@@ -99,6 +99,109 @@ void loop() {
 			  if(angle == -90)
 			  	angle = 90;
 		  }
-    }
+      if(droite && gauche)
+	  {
+		if(angle == 0||angle == 180||angle == 90)
+			droite=false
+		else 
+		gauche=false
+	  }
+
+	  if (angle == 0)
+	  {
+		if (gauche)
+		{
+			MOTOR_SetSpeed(0,-1);
+			MOTOR_SetSpeed(-1,1);
+			delay(1000);
+			MOTOR_SetSpeed(0,0);
+			MOTOR_SetSpeed(1,0);
+
+			angle = -90;
+		}
+		if(droite)
+		{
+			MOTOR_SetSpeed(0,1);
+			MOTOR_SetSpeed(1,-1);
+			delay(1000);
+			MOTOR_SetSpeed(0,0);
+			MOTOR_SetSpeed(1,0);
+
+			angle = 90;
+		}		
+	  }
+	  if (angle==180)
+	  {
+		if(gauche)
+		{
+			MOTOR_SetSpeed(0,-1);
+			MOTOR_SetSpeed(-1,1);
+			delay(1000);
+			MOTOR_SetSpeed(0,0);
+			MOTOR_SetSpeed(1,0);
+
+			angle=90;
+		}
+		if (droite)
+		{
+			MOTOR_SetSpeed(0,1);
+			MOTOR_SetSpeed(1,-1);
+			delay(1000);
+			MOTOR_SetSpeed(0,0);
+			MOTOR_SetSpeed(1,0);
+
+			angle = -90;
+		}
+	  }
+	  if(angle==90)
+	  {
+		if(gauche)
+		{
+			MOTOR_SetSpeed(0,-1);
+			MOTOR_SetSpeed(-1,1);
+			delay(1000);
+			MOTOR_SetSpeed(0,0);
+			MOTOR_SetSpeed(1,0);
+
+			angle = -90;
+		}
+		if(droite)
+		{
+			MOTOR_SetSpeed(0,1);
+			MOTOR_SetSpeed(1,-1);
+			delay(1000);
+			MOTOR_SetSpeed(0,0);
+			MOTOR_SetSpeed(1,0);
+
+			angle = 90;
+		}
+	  }
+		if(angle==-90)
+		{
+			if(gauche)
+			{
+				MOTOR_SetSpeed(0,-1);
+				MOTOR_SetSpeed(-1,1);
+				delay(1000);
+				MOTOR_SetSpeed(0,0);
+				MOTOR_SetSpeed(1,0);
+				
+				angle = 180;
+			}
+			if (droite)
+			{
+				MOTOR_SetSpeed(0,1);
+				MOTOR_SetSpeed(1,-1);
+				delay(1000);
+				MOTOR_SetSpeed(0,0);
+				MOTOR_SetSpeed(1,0);
+
+				angle = 0;
+			}
+		}
+	  }
+
+    }   
+
   }
 }
