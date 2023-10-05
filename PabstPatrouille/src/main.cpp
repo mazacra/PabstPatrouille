@@ -11,6 +11,7 @@ void arret(){
 }
 
 void avancer(){
+	Serial.println("avancer");
 	ENCODER_Reset(1);
 	
 	while (ENCODER_Read(1) < 6683)
@@ -24,9 +25,10 @@ void avancer(){
 }
 
 void tGauche(int iteration = 1){
+	Serial.println("Tourne a gauche");
     ENCODER_Reset(1);
 
-	while (ENCODER_Read(1) < iteration * 1994)
+	while (ENCODER_Read(1) < iteration * 1944)
 	{
 		MOTOR_SetSpeed(0, -0.25);
     	MOTOR_SetSpeed(1, 0.25);
@@ -36,9 +38,10 @@ void tGauche(int iteration = 1){
 }
 
 void tDroite(int iteration = 1){
+	Serial.println("Tourne a droite");
 	ENCODER_Reset(0);
 
-	while (ENCODER_Read(0) < iteration * 1994)
+	while (ENCODER_Read(0) < iteration * 1944)
 	{
 		MOTOR_SetSpeed(0, 0.25);
     	MOTOR_SetSpeed(1, -0.25);
@@ -49,7 +52,9 @@ void tDroite(int iteration = 1){
 
 void setup(){
 	BoardInit();
+	Serial.begin(9600);
 
+	isStart = false;
   	x = 2;
   	y = 1;
 }
@@ -59,7 +64,15 @@ void loop() {
 		isStart = true;
 	}
 
-	if(isStart){
+	if(isStart && y < 10){
+		Serial.print("Current POS:");
+		Serial.print(x);
+		Serial.println(y);
+		Serial.println(angle);
+
+		bool gauche = false;
+		bool droite = false;
+
 		if((digitalRead(33) == 1 && digitalRead(39) == 1) && !(angle == 180 && y == 1) && !(angle == 90 && x == 3) && !(angle == -90 && x == 1))
 		{
     		avancer();
@@ -75,39 +88,44 @@ void loop() {
   		}
   		else
   		{
-			bool gauche, droite;
     		if(y % 2 == 0)
 			{
+				Serial.println("Cul de sac");
     			tDroite(2);
 		  		if(angle == 0)
-		  			angle == 180;
+		  			angle = 180;
 		  		else
-		  			angle == 0;
+		  			angle = 0;
 			}
     		else
     		{
-    	  		if((angle == 0 && x != 3) || (angle == 180 && x != 1) || (angle == 90 && y != 1))
+    	  		if((angle == 0 && x != 3) || (angle == 180 && x != 1) || (angle == 90 && y != 1) || angle == -90)
 			  	{
 				  	tDroite();
 	
-				  	if(digitalRead(33) == 0 && digitalRead(39) == 0)
+				  	if(digitalRead(33) == 1 && digitalRead(39) == 1){
+						Serial.println("Droite OK!");
 				  		droite = true;
+					}
 	
 				  	tGauche();
 			  	}
 
-    	  		if((angle == 0 && x != 1) && (angle == 180 && x != 3) || (angle == -90 && y != 1))
+    	  		if((angle == 0 && x != 1) || (angle == 180 && x != 3) || (angle == -90 && y != 1) || angle == 90)
 			  	{
 			  		tGauche();
 
-			  		if(digitalRead(33) == 0 && digitalRead(39) == 0)
+			  		if(digitalRead(33) == 1 && digitalRead(39) == 1){
+						Serial.println("Gauche OK!");
 			  			gauche = true;
+					}
 
 			  		tDroite();
 			  	}
 
     	  		if(!droite && !gauche)
     	  		{
+					Serial.println("Cul de sac");
 				  	tDroite(2);
 
 				  	if(angle == 0)
@@ -122,6 +140,7 @@ void loop() {
 
     	  		if(droite && gauche)
 		  		{
+					Serial.println("Les deux sont OK!");
 					if(angle == 0||angle == 180||angle == 90)
 						droite=false;
 					else 
@@ -164,7 +183,7 @@ void loop() {
 						if (droite)
 						{
 							tDroite();
-							angle -= 90;
+							angle += 90;
 						}
 						break;
 					case 180:
