@@ -3,11 +3,10 @@
 int x,y,angle;
 bool isStart;
 
-
 void CommencerTerminer(){
 	if(ROBUS_IsBumper(3) || y == 10){
 		isStart = !isStart;
-		delay(500);
+		delay(1000);
 		x = 2;
 		y = 1;
 	}
@@ -21,67 +20,58 @@ void arret(){
 	delay(500);
 }
 
-float calculeclic (float vitesse, int id,int cycle)
-{
-    int clicSeconde = ENCODER_Read(id);
-    Serial.println(clicSeconde);
-    float vitessed = (1290*cycle);
-    float difference = vitessed - clicSeconde;
-    float ponderation = 0.0001;
-    if (difference * ponderation < 0.05 && difference * ponderation > -0.05)
-    {
-      return vitesse;
-    }
-    
-    else
-    {
-      vitesse = difference * ponderation + vitesse;
-      return vitesse;
-    }
+float diffClic (){
+	int clic0 = ENCODER_Read(0);
+	int clic1 = ENCODER_Read(1);
+	float diff;
+
+		diff = (clic0 - clic1)/2;
+		return diff;
 }
 
 void avancer(){
-  	int idelay = 500;
-  	float vitesse1 = 0.25;
-  	float vitesse0 = 0.25;
-  	int cycle = 1;
+  	int idelay = 300;
+  	float vitesse0 = 0.30;
+	float vitesse1 = 0.30;
+	float ponderation = 0.0001;
 	ENCODER_Reset(1);
 	ENCODER_Reset(0);
-	while (ENCODER_Read(1) < 6683)
-	{
+
+	while (ENCODER_Read(1) < 6000 && ENCODER_Read(0) < 6000){
 		CommencerTerminer();
         if(isStart){
 			MOTOR_SetSpeed(1, vitesse1);
 			MOTOR_SetSpeed(0, vitesse0);
 			delay(idelay);
+			
+			vitesse0 = vitesse0 - diffClic()*ponderation;
 			Serial.println("gauche");
-			Serial.println(calculeclic(vitesse0,0,cycle));
+			Serial.println(vitesse0);
+			Serial.println(diffClic());
+			vitesse1 = vitesse1 + diffClic()*ponderation;
 			Serial.println("droite");
-			Serial.println(calculeclic(vitesse1,1,cycle));
-			cycle++;
+			Serial.println(vitesse1);
+			Serial.println(diffClic());
 		 }else
             break;	
 	}
-	
 	arret();	
 }
 
 void tGauche(int iteration = 1){
-	//Serial.println("Tourne a gauche");
     ENCODER_Reset(1);
     ENCODER_Reset(0);
 
-	while (ENCODER_Read(1) < iteration * 1944)
+	while (ENCODER_Read(1) < iteration * 1900)
 	{
 		CommencerTerminer();
         if(isStart){
-			MOTOR_SetSpeed(0, -0.25);
-			MOTOR_SetSpeed(1, 0.25);
+			MOTOR_SetSpeed(0, -0.15);
+			MOTOR_SetSpeed(1, 0.15);
 			delay(1);
 		}else
             break;
-	}
-	
+	}	
     arret();
 }
 
@@ -89,12 +79,12 @@ void tDroite(int iteration = 1){
 	//Serial.println("Tourne a droite");
 	ENCODER_Reset(0);
   	ENCODER_Reset(1);
-	while (ENCODER_Read(0) < iteration * 1994)
+	while (ENCODER_Read(0) < iteration * 1990)
 	{
 		CommencerTerminer();
         if(isStart){
-			MOTOR_SetSpeed(0, 0.25);
-			MOTOR_SetSpeed(1, -0.25);
+			MOTOR_SetSpeed(0, 0.15);
+			MOTOR_SetSpeed(1, -0.15);
 			delay(1);
 		}else
         	break;
@@ -152,8 +142,6 @@ void loop() {
     	  		if((angle == 0 && x != 3) || (angle == 180 && x != 1) || (angle == 90 && y != 1) || angle == -90)
 			  	{
 				  	tDroite();
-					Serial.println("droite");
-					Serial.println(digitalRead(33),digitalRead(39));
 				  	if(digitalRead(33) == 1 && digitalRead(39) == 1){
 						Serial.println("Droite OK!");
 				  		droite = true;
@@ -165,7 +153,6 @@ void loop() {
     	  		if((angle == 0 && x != 1) || (angle == 180 && x != 3) || (angle == -90 && y != 1) || angle == 90)
 			  	{
 			  		tGauche();
-					Serial.println("gauche");
 			  		if(digitalRead(33) == 1 && digitalRead(39) == 1){
 						Serial.println("Gauche OK!");
 			  			gauche = true;
@@ -259,3 +246,22 @@ void loop() {
 
 }
 
+/*float calculeclic (float vitesse, int id,int cycle)
+{
+    int clicSeconde = ENCODER_Read(id);
+    Serial.println(clicSeconde);
+    float vitessed = (1000*cycle);
+    float difference = vitessed - clicSeconde;
+    float ponderation = 0.0002;
+
+    if (difference * ponderation < 0.0004 && difference * ponderation > -0.0004)
+    {
+      return vitesse;
+    }
+
+    else
+    {
+      vitesse = difference * ponderation + vitesse;
+      return vitesse;
+    }
+}*/
