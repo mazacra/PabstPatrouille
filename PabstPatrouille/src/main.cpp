@@ -4,7 +4,7 @@ int x,y,angle;
 bool isStart;
 
 void CommencerTerminer(){
-	if(ROBUS_IsBumper(3) || y == 10){
+	if(ROBUS_IsBumper(3) || digitalRead(PIN_A4) == 1 || y == 10){
 		isStart = !isStart;
 		delay(1000);
 		x = 2;
@@ -73,6 +73,24 @@ void tGauche(int iteration = 1){
             break;
 	}	
     arret();
+
+	switch (angle)
+	{
+		case 0:
+			angle -= 90;	
+			break;
+		case 90:
+			angle -= 90;
+			break;
+		case -90:
+			angle = 180;
+			break;
+		case 180:
+			angle=90;
+			break;
+		default:
+			break;
+	}	
 }
 
 void tDroite(int iteration = 1){
@@ -91,12 +109,91 @@ void tDroite(int iteration = 1){
 	}
 	
     arret();
+
+	switch (angle)
+	{
+		case 0:
+			angle += 90;
+			break;
+		case 90:
+			angle += 90;
+			break;
+		case -90:
+			angle += 90;
+			break;
+		case 180:
+			angle = -90;
+			break;
+		default:
+			break;
+	}	
+}
+
+void Verification(){
+	bool gauche = false;
+	bool droite = false;
+	int anglePresent = angle;
+
+    if((anglePresent == 0 && x != 1) || (anglePresent == 180 && x != 3) || (anglePresent == -90 && y != 1) || anglePresent   == 90)
+	{
+		tGauche();
+		if(digitalRead(33) == 1 && digitalRead(39) == 1){
+			Serial.println("Gauche OK!");
+			gauche = true;
+		}
+
+		if(anglePresent != 90 && !gauche){
+			tDroite();
+		}
+	}
+
+		if(anglePresent != 90 && !gauche){
+    		if((anglePresent == 0 && x != 3) || (anglePresent == 180 && x != 1) || (anglePresent == 90 && y != 1) || anglePresent == -90)
+	  		{
+			  	tDroite();
+			  	if(digitalRead(33) == 1 && digitalRead(39) == 1){
+					Serial.println("Droite OK!");
+			  		droite = true;
+				}
+	
+			if(anglePresent != -90 && !droite){
+		  		tGauche();
+			}
+		}
+	}
+
+
+    if(!droite && !gauche)
+    {
+		Serial.println("Cul de sac 2");
+	  	tDroite(2);
+
+	  	if(angle == 0)
+	  		angle = 180;
+	  	if(angle == 180)
+	  		angle = 0;
+	  	if(angle == 90)
+	  		angle = -90;
+	  	if(angle == -90)
+	  		angle = 90;
+	}
+
+    if(droite && gauche)
+	{
+		Serial.println("Les deux sont OK!");
+		if(angle == 0||angle == 180||angle == 90)
+			droite=false;
+		else 
+			gauche=false;
+	}
 }
 
 void setup(){
 	BoardInit();
 	Serial.begin(9600);
 
+	pinMode(PIN_A4, INPUT);
+    pinMode(PIN_A5, INPUT);
 }
 
 void loop() {
@@ -109,8 +206,6 @@ void loop() {
 		Serial.println(y);
 		Serial.println(angle);
 
-		bool gauche = false;
-		bool droite = false;
 
 		if((digitalRead(33) == 1 && digitalRead(39) == 1) && !(angle == 180 && y == 1) && !(angle == 90 && x == 3) && !(angle == -90 && x == 1))
 		{
@@ -125,120 +220,28 @@ void loop() {
 			  	x++;
 		  	if(angle == -90)
 			 	x--;
+
+			if(angle == 90 || angle == -90){
+				if(angle == 90){
+					tGauche();
+				}else{
+					tDroite();
+				}
+
+				if(digitalRead(33) == 0 && digitalRead(39) == 0){
+					if(angle == 90){
+						tDroite();
+					}else{
+						tGauche();
+					}
+				}
+			}
   		}
   		else
   		{
-    		if(y % 2 == 0)
-			{
-				Serial.println("Cul de sac 1");
-    			tDroite(2);
-		  		if(angle == 0)
-		  			angle = 180;
-		  		else
-		  			angle = 0;
-			}
-    		else
-    		{
-    	  		if((angle == 0 && x != 3) || (angle == 180 && x != 1) || (angle == 90 && y != 1) || angle == -90)
-			  	{
-				  	tDroite();
-				  	if(digitalRead(33) == 1 && digitalRead(39) == 1){
-						Serial.println("Droite OK!");
-				  		droite = true;
-					}
-	
-				  	tGauche();
-			  	}
-
-    	  		if((angle == 0 && x != 1) || (angle == 180 && x != 3) || (angle == -90 && y != 1) || angle == 90)
-			  	{
-			  		tGauche();
-			  		if(digitalRead(33) == 1 && digitalRead(39) == 1){
-						Serial.println("Gauche OK!");
-			  			gauche = true;
-					}
-
-			  		tDroite();
-			  	}
-
-    	  		if(!droite && !gauche)
-    	  		{
-					Serial.println("Cul de sac 2");
-				  	tDroite(2);
-
-				  	if(angle == 0)
-				  		angle = 180;
-				  	if(angle == 180)
-				  		angle = 0;
-				  	if(angle == 90)
-				  		angle = -90;
-				  	if(angle == -90)
-				  		angle = 90;
-			  	}
-
-    	  		if(droite && gauche)
-		  		{
-					Serial.println("Les deux sont OK!");
-					if(angle == 0||angle == 180||angle == 90)
-						droite=false;
-					else 
-						gauche=false;
-		  		}
-
-				switch (angle)
-				{
-					case 0:
-						if (gauche)
-						{
-							tGauche();
-							angle -= 90;
-						}
-
-						if(droite)
-						{
-							tDroite();
-							angle += 90;
-						}		
-						break;
-					case 90:
-						if(gauche)
-						{
-							tGauche();
-							angle -= 90;
-						}
-						if(droite)
-						{
-							tDroite();
-							angle += 90;
-						}
-						break;
-					case -90:
-						if(gauche)
-						{
-							tGauche();
-							angle = 180;
-						}
-						if (droite)
-						{
-							tDroite();
-							angle += 90;
-						}
-						break;
-					case 180:
-						if(gauche)
-						{
-							tGauche();
-							angle=90;
-						}
-						if (droite)
-						{
-							tDroite();
-							angle = -90;
-						}
-						break;
-					default:
-						break;
-				}	
+    		if(y % 2 == 1)
+    		{ 	
+				Verification();
 		  	}
 
     	}   
