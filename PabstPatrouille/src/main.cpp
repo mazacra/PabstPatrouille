@@ -41,7 +41,7 @@ void avancer(){
 	ENCODER_Reset(1);
 	ENCODER_Reset(0);
 
-	while (ENCODER_Read(1) < 6600 && ENCODER_Read(0) < 6600){
+	while (ENCODER_Read(1) < 6750 && ENCODER_Read(0) < 6750){
 		CommencerTerminer();
         if(isStart){
 			MOTOR_SetSpeed(1, vitesse1);
@@ -98,22 +98,22 @@ void tGauche(int iteration = 1){
 		}	
     	arret();
 		switch (angle)
-				{
-					case 0:
-						angle -= 90;	
-						break;
-					case 90:
-						angle -= 90;
-						break;
-					case -90:
-						angle = 180;
-						break;
-					case 180:
-						angle=90;
-						break;
-					default:
-						break;
-				}	
+		{
+			case 0:
+				angle -= 90;	
+				break;
+			case 90:
+				angle -= 90;
+				break;
+			case -90:
+				angle = 180;
+				break;
+			case 180:
+				angle = 90;
+				break;
+			default:
+				break;
+		}	
 	}
 }
 
@@ -160,31 +160,36 @@ void Verification(){
 	int anglePresent = angle;
 
 	//Verifie exterieur terrain
-    if((anglePresent == 0 && x != 1) || (anglePresent == 180 && x != 3) || (anglePresent == -90 && y != 1) || anglePresent   == 90)
-	{
-		tGauche();
-		if(digitalRead(33) == 1 || digitalRead(39) == 1){
-			Serial.println("Gauche OK!");
-			gauche = true;
-		}
+	if(!(anglePresent == -90 && x == 1)){
+    	if((anglePresent == 0 && x != 1) || (anglePresent == 180 && x != 3) || (anglePresent == -90 && y != 1) || anglePresent == 90)
+		{
+			tGauche();
+			if(digitalRead(33) == 1 || digitalRead(39) == 1){
+				Serial.println("Gauche OK!");
+				gauche = true;
+			}
 
-		if(!((anglePresent == 90 || anglePresent == 0) && gauche)){
-			tDroite();
+			if(!((anglePresent == 90 || anglePresent == 0) && gauche)){
+				tDroite();
+			}
 		}
 	}
 
 	if(!((anglePresent == 90 || anglePresent == 0) && gauche)){
-		//Verifie exterieur terrain
-    	if((anglePresent == 0 && x != 3) || (anglePresent == 180 && x != 1) || (anglePresent == 90 && y != 1) || anglePresent == -90)
-		{
-			tDroite();
-		  	if(digitalRead(33) == 1 || digitalRead(39) == 1){
-				Serial.println("Droite OK!");
-		  		droite = true;
-			}
+		if(!(anglePresent == 90 && x == 3)){
 
-			if(!(anglePresent == -90 && droite)){
-	  			tGauche();
+		//Verifie exterieur terrain
+    		if((anglePresent == 0 && x != 3) || (anglePresent == 180 && x != 1) || (anglePresent == 90 && y != 1) || anglePresent == -90)
+			{
+				tDroite();
+			  	if(digitalRead(33) == 1 || digitalRead(39) == 1){
+					Serial.println("Droite OK!");
+			  		droite = true;
+				}
+
+				if(!(anglePresent == -90 && droite)){
+	  				tGauche();
+				}
 			}
 		}
 	}
@@ -192,14 +197,14 @@ void Verification(){
 
     if(!droite && !gauche)
     {
-		Serial.println("Cul de sac 2");
+		Serial.println("Cul de sac");
 	  	tDroite(2);
 	}
 
     if(droite && gauche)
 	{
 		Serial.println("Les deux sont OK!");
-		if(angle == 0||angle == 180||angle == 90)
+		if(angle == 0 || angle == 180 || angle == 90)
 			droite=false;
 		else 
 			gauche=false;
@@ -263,25 +268,4 @@ void loop() {
 			Verification();
     	}   
 	}
-
 }
-
-/*float calculeclic (float vitesse, int id,int cycle)
-{
-    int clicSeconde = ENCODER_Read(id);
-    Serial.println(clicSeconde);
-    float vitessed = (1000*cycle);
-    float difference = vitessed - clicSeconde;
-    float ponderation = 0.0002;
-
-    if (difference * ponderation < 0.0004 && difference * ponderation > -0.0004)
-    {
-      return vitesse;
-    }
-
-    else
-    {
-      vitesse = difference * ponderation + vitesse;
-      return vitesse;
-    }
-}*/
