@@ -1,51 +1,49 @@
 #include <LibRobus.h>
 
-int x,y,angle;
 bool isStart;
 
 void CommencerTerminer(){
-    if(ROBUS_IsBumper(3) || analogRead(PIN_A4) > 600 || y == 10){
-        if(!(analogRead(PIN_A4) > 600 && isStart)){ 
-            isStart = !isStart;
-            delay(1000);
-            x = 2;
-            y = 1;
-			angle = 0;
-        }
+    if(ROBUS_IsBumper(3) || analogRead(PIN_A4) > 600){					//bumper ou sifflet pour démarrer
+        isStart = !isStart;
     }
+
+	while(analogRead(PIN_A4) > 600){}									//ne démarre pas tant qu'il entends le sifflet
 }
 
+//Potentiellement inutile
 void arret(){
-	MOTOR_SetSpeed(1, 0);
-  	MOTOR_SetSpeed(0, 0);
-  	ENCODER_Reset(1);
-  	ENCODER_Reset(0);
+  	MOTOR_SetSpeed(LEFT, 0);
+	MOTOR_SetSpeed(RIGHT, 0);
+  	ENCODER_Reset(LEFT);
+  	ENCODER_Reset(RIGHT);
 	delay(100);
 }
 
 float diffClic (){
-	int clic0 = ENCODER_Read(0);
-	int clic1 = ENCODER_Read(1);
-	float diff;
+	int clic0 = ENCODER_Read(LEFT);
+	int clic1 = ENCODER_Read(RIGHT);
 
-		diff = (clic0 - clic1)/2;
-		return diff;
+	return (clic0 - clic1)/2;
 }
 
+//Potentiellement à modifier pour qu'il avance toujours (on a pas de raison de s'arrêter pour l'instant)
+//Donc pourrait ce simplifier à allumer les moteurs, et on appelera notre PID ailleurs
 void avancer(){
   	int idelay = 300;
   	float vitesse0 = 0.25;
 	float vitesse1 = 0.25;
 	float ponderation = 0.0001;
 	float cycle = 1;
-	ENCODER_Reset(1);
-	ENCODER_Reset(0);
+	
+	ENCODER_Reset(LEFT);																//Reset encoder
+	ENCODER_Reset(RIGHT);																//Reset encoder
 
-	while (ENCODER_Read(1) < 6750 && ENCODER_Read(0) < 6750){
+	while (ENCODER_Read(RIGHT) < 6750 && ENCODER_Read(LEFT) < 6750){
 		CommencerTerminer();
+
         if(isStart){
-			MOTOR_SetSpeed(1, vitesse1);
-			MOTOR_SetSpeed(0, vitesse0);
+			MOTOR_SetSpeed(LEFT, vitesse0);											//Changement de vitesse
+			MOTOR_SetSpeed(RIGHT, vitesse1);											//Changement de vitesse
 			delay(idelay);
 			if(cycle < 1.8)
 			{
@@ -58,68 +56,73 @@ void avancer(){
 				vitesse1 = (vitesse1 + diffClic()*ponderation) * 0.65;
 			}
 
-			Serial.println("gauche");
-			Serial.println(vitesse0);
-			Serial.println(diffClic());
-			Serial.println("droite");
-			Serial.println(vitesse1);
-			Serial.println(diffClic());
-			Serial.println(cycle);
 			cycle = cycle * 1.3;
 		 }else
             break;	
 	}
-	arret();
+
+	arret();																		//Arret
 }
 
-void tGauche(int iteration = 1){
-	for(int i = 0; i < iteration; i++){
-    	ENCODER_Reset(1);
-    	ENCODER_Reset(0);
-		Serial.println("tourne gauche");
-		while (ENCODER_Read(1) < 1970)
-		{
-			CommencerTerminer();
-        	if(isStart){
-				MOTOR_SetSpeed(0, -0.15);
-				MOTOR_SetSpeed(1, 0.15);
-				delay(1);
-			}else
-            	break;
-		}	
-    	arret();	
-	}
+//Pas vraiment nécessaire dans Nascar, on tourne que à droite
+//A garder pour trouver la balle
+//POurrait surement être simplifier
+void tGauche(){
+    ENCODER_Reset(LEFT);							//Reset encoder
+    ENCODER_Reset(RIGHT);							//Reset encoder
+	
+	while (ENCODER_Read(RIGHT) < 1970)				//À changer potentiellement, car plus des carrées
+	{
+		CommencerTerminer();
+    	if(isStart){
+			MOTOR_SetSpeed(LEFT, -0.15);			//Changement de vitesses
+			MOTOR_SetSpeed(RIGHT, 0.15);			//Changement de vitesses
+		}else
+        	break;
+	}	
+
+    arret();									//Stop
 }
 
-void tDroite(int iteration = 1){
-	//Serial.println("Tourne a droite");
-	for (int i = 0; i < iteration; i++){
-		ENCODER_Reset(0);
-  		ENCODER_Reset(1);
-		Serial.println("tourne droite");
-		while (ENCODER_Read(0) < 2010)
-		{
-			CommencerTerminer();
-    	    if(isStart){
-				MOTOR_SetSpeed(0, 0.15);
-				MOTOR_SetSpeed(1, -0.15);
-				delay(1);
-			}else
-    	    	break;
-		}
-    	arret();
+//à changer pour pas que ça tourne sur place, ou créer une autre fonction pour faire les gros tournants
+void tDroite(){
+	ENCODER_Reset(LEFT);							//Reset encoder
+  	ENCODER_Reset(RIGHT);							//Reset encoder
+
+	while (ENCODER_Read(LEFT) < 2010)				//À changer potentiellement, car plus des carrées
+	{			
+		CommencerTerminer();			
+        if(isStart){			
+			MOTOR_SetSpeed(LEFT, 0.15);			//Changement de vitesse
+			MOTOR_SetSpeed(RIGHT, -0.15);			//Changement de vitesse
+		}else
+        	break;
 	}
+	
+	arret();									//Stop
 }
+
+//Créer logique pour Section1 (départ,jump)
+//Créer logique pour 1er tournant (tapis)
+//Créer logique pour Section2 (taper le verre)
+//Créer logique pour 2ème tournant (trouver la balle)
 
 
 void setup(){
 	BoardInit();
 	Serial.begin(9600);
 
+	//initialiser les senseurs ajoutés
+
 	pinMode(PIN_A4, INPUT);
     pinMode(PIN_A5, INPUT);
 }
 
 void loop() {
+	//Appel CommencerTerminer
 
+	//Condition if start
+	//{
+	//	Logique
+	//}
 }
