@@ -1,5 +1,4 @@
 #include <LibRobus.h>
-
 bool isStart;
 
 void CommencerTerminer(){
@@ -106,6 +105,73 @@ void tDroite(){
 //Créer logique pour 1er tournant (tapis)
 //Créer logique pour Section2 (taper le verre)
 //Créer logique pour 2ème tournant (trouver la balle)
+float ajustementVitesseTournerDroite(float rayonDroit, float rayonGauche, float vitesseRoueGauche)
+{
+	//Calcul la distance que les 2 roues parcour
+	float roueDroiteDistance = (2 * PI * (rayonDroit)) / 4;
+	float roueGaucheDistance = (2 * PI * (rayonGauche)) / 4;
+
+	//Calcul la vitesse à laquelle la roue droite doit s'ajuster selon la vitesse de la roue gauche
+	float difference = roueDroiteDistance / roueGaucheDistance;
+	float vitesseRoueDroite = vitesseRoueGauche * difference;
+
+	return vitesseRoueDroite;
+}
+void section1Et3()
+{
+	ENCODER_Reset(LEFT);							//Reset encoder
+  	ENCODER_Reset(RIGHT);
+	float vitesseRoueGauche = 0.3;
+	
+	//Si couleurDétecter = vert(programmer la condition)
+	while(ENCODER_Read(LEFT) < 11833)//ajuster la valeur au besoin
+	{
+		if(isStart)
+		{
+			MOTOR_SetSpeed(LEFT, vitesseRoueGauche);			//Changement de vitesse
+			MOTOR_SetSpeed(RIGHT, ajustementVitesseTournerDroite(30.48 + 5.89, 60.96 - 5.89, vitesseRoueGauche));
+		}else
+			break;
+	}
+
+	//Si couleurDétecter = jaune (programmer la condition)
+	while(ENCODER_Read(LEFT) < 18382)//ajuster la valeur au besoin
+	{
+		if(isStart)
+		{
+			MOTOR_SetSpeed(LEFT, vitesseRoueGauche);			//Changement de vitesse
+			MOTOR_SetSpeed(RIGHT, ajustementVitesseTournerDroite(60.96 + 5.89, 91.44 - 5.89, vitesseRoueGauche));
+		}else
+			break;
+		
+	}
+}
+
+void avancer1(float distance) //distance à parcourir en cm
+{
+	float vitesseMax = 0.4;
+	int idelay = 300;
+  	float vitesse0 = 0.2;
+	float vitesse1 = 0.2;
+	float ponderation = 0.0001;
+	float distanceEncoder = (distance / 23.939) * 3200;
+
+	while (ENCODER_Read(RIGHT) < distanceEncoder && ENCODER_Read(LEFT) < distanceEncoder)
+	{
+        if(isStart)
+		{
+			MOTOR_SetSpeed(LEFT, vitesse0);											//Changement de vitesse
+			MOTOR_SetSpeed(RIGHT, vitesse1);										//Changement de vitesse
+			delay(idelay);
+
+			vitesse0 = vitesseMax * sin(2 * PI * ENCODER_Read(LEFT) / distanceEncoder) + 0.2;	//À tester voir si l'accélération et décélération marche
+			vitesse1 = vitesseMax * sin(2 * PI * ENCODER_Read(RIGHT) / distanceEncoder) + 0.2;	//vrai vitesse max = 0.6
+			
+			vitesse0 = (vitesse0 - diffClic() * ponderation);
+			vitesse1 = (vitesse1 + diffClic() * ponderation);
+		}
+	}
+}
 
 
 void setup(){
