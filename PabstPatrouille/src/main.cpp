@@ -1,5 +1,7 @@
 #include <LibRobus.h>
 bool isStart;
+const float DISTANCE_ENTRE_ROUE = 18.7;  //Valeur en cm
+const float CIRCONFERENCE_ROUE = 23.939;
 
 void CommencerTerminer(){
     if(ROBUS_IsBumper(3) || analogRead(PIN_A4) > 600){					//bumper ou sifflet pour démarrer
@@ -66,39 +68,43 @@ void avancer(){
 //Pas vraiment nécessaire dans Nascar, on tourne que à droite
 //A garder pour trouver la balle
 //POurrait surement être simplifier
-void tGauche(){
+void tGauche(int angle)				//angle en degré
+{
     ENCODER_Reset(LEFT);							//Reset encoder
     ENCODER_Reset(RIGHT);							//Reset encoder
+	float vitesseRoueDroite = 0.15;
+
+	int valeurEncoder = (2 * PI * DISTANCE_ENTRE_ROUE * angle / 360) * 3200 / CIRCONFERENCE_ROUE;
 	
-	while (ENCODER_Read(RIGHT) < 1970)				//À changer potentiellement, car plus des carrées
+	while (ENCODER_Read(RIGHT) < valeurEncoder)				
 	{
 		CommencerTerminer();
     	if(isStart){
-			MOTOR_SetSpeed(LEFT, -0.15);			//Changement de vitesses
-			MOTOR_SetSpeed(RIGHT, 0.15);			//Changement de vitesses
+			MOTOR_SetSpeed(LEFT, 0);							//Changement de vitesses
+			MOTOR_SetSpeed(RIGHT, vitesseRoueDroite);			//Changement de vitesses
 		}else
         	break;
 	}	
-
-    arret();									//Stop
 }
 
 //à changer pour pas que ça tourne sur place, ou créer une autre fonction pour faire les gros tournants
-void tDroite(){
+void tDroite(int angle)				//angle en degré
+{
 	ENCODER_Reset(LEFT);							//Reset encoder
   	ENCODER_Reset(RIGHT);							//Reset encoder
+	float vitesseRoueGauche = 0.15;
 
-	while (ENCODER_Read(LEFT) < 2010)				//À changer potentiellement, car plus des carrées
+	int valeurEncoder = (2 * PI * DISTANCE_ENTRE_ROUE * angle / 360) * 3200 / CIRCONFERENCE_ROUE;
+
+	while (ENCODER_Read(LEFT) < valeurEncoder)				
 	{			
 		CommencerTerminer();			
         if(isStart){			
-			MOTOR_SetSpeed(LEFT, 0.15);			//Changement de vitesse
-			MOTOR_SetSpeed(RIGHT, -0.15);			//Changement de vitesse
+			MOTOR_SetSpeed(LEFT, vitesseRoueGauche);			//Changement de vitesse
+			MOTOR_SetSpeed(RIGHT, 0);							//Changement de vitesse
 		}else
         	break;
 	}
-	
-	arret();									//Stop
 }
 
 //Créer logique pour Section1 (départ,jump)
@@ -154,7 +160,7 @@ void avancer1(float distance) //distance à parcourir en cm
   	float vitesse0 = 0.2;
 	float vitesse1 = 0.2;
 	float ponderation = 0.0001;
-	float distanceEncoder = (distance / 23.939) * 3200;
+	float distanceEncoder = (distance / CIRCONFERENCE_ROUE) * 3200;
 
 	while (ENCODER_Read(RIGHT) < distanceEncoder && ENCODER_Read(LEFT) < distanceEncoder)
 	{
@@ -171,6 +177,27 @@ void avancer1(float distance) //distance à parcourir en cm
 			vitesse1 = (vitesse1 + diffClic() * ponderation);
 		}
 	}
+}
+
+
+void changementVoie(float distanceDevant, float distanceCote)		//permet de changer de voie dans la section 9 ou 0
+{																	
+	float angle = atan(distanceCote / distanceDevant);
+
+	float distanceParcourutTournantDevant = DISTANCE_ENTRE_ROUE * sin(angle);			//Robot ne tourne pas sur place donc calcul des valeur qui nous fait decaler
+	float distanceParcourutTournantCote = DISTANCE_ENTRE_ROUE - (DISTANCE_ENTRE_ROUE * cos(angle));
+
+	float distance = sqrt(pow(distanceDevant - distanceParcourutTournantDevant, 2) + pow(distanceCote - distanceParcourutTournantCote, 2));	//pytagore pour trouver l'hypotenuse
+
+	//Si vert au jaune (programmer pour savoir sur quelle couleur on se trouve)
+	tGauche(angle);
+	avancer1(distance);
+	tDroite(angle);
+
+	//Si jaune au vert (programmer pour savoir sur quelle couleur on se trouve)
+	tDroite(angle);
+	avancer1(distance);
+	tGauche(angle);
 }
 
 
