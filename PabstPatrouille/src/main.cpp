@@ -2,6 +2,8 @@
 bool isStart;
 const float DISTANCE_ENTRE_ROUE = 18.7;  //Valeur en cm
 const float CIRCONFERENCE_ROUE = 23.939;
+short couleur = 1;														//1=Vert, 2=Jaune
+short section = 1;														//1=TournantTapis, 2=ligneTaperVerre, 3=TournantBalle, 4=LigneSaut
 
 void CommencerTerminer(){
     if(ROBUS_IsBumper(3) || analogRead(PIN_A4) > 600){					//bumper ou sifflet pour démarrer
@@ -108,51 +110,6 @@ void tDroite(int angle)				//angle en degré
 }
 
 //Créer logique pour Section1 (départ,jump)
-//Créer logique pour 1er tournant (tapis)
-//Créer logique pour Section2 (taper le verre)
-//Créer logique pour 2ème tournant (trouver la balle)
-float ajustementVitesseTournerDroite(float rayonDroit, float rayonGauche, float vitesseRoueGauche)
-{
-	//Calcul la distance que les 2 roues parcour
-	float roueDroiteDistance = (2 * PI * (rayonDroit)) / 4;
-	float roueGaucheDistance = (2 * PI * (rayonGauche)) / 4;
-
-	//Calcul la vitesse à laquelle la roue droite doit s'ajuster selon la vitesse de la roue gauche
-	float difference = roueDroiteDistance / roueGaucheDistance;
-	float vitesseRoueDroite = vitesseRoueGauche * difference;
-
-	return vitesseRoueDroite;
-}
-void section1Et3()
-{
-	ENCODER_Reset(LEFT);							//Reset encoder
-  	ENCODER_Reset(RIGHT);
-	float vitesseRoueGauche = 0.3;
-	
-	//Si couleurDétecter = vert(programmer la condition)
-	while(ENCODER_Read(LEFT) < 11833)//ajuster la valeur au besoin
-	{
-		if(isStart)
-		{
-			MOTOR_SetSpeed(LEFT, vitesseRoueGauche);			//Changement de vitesse
-			MOTOR_SetSpeed(RIGHT, ajustementVitesseTournerDroite(30.48 + 5.89, 60.96 - 5.89, vitesseRoueGauche));
-		}else
-			break;
-	}
-
-	//Si couleurDétecter = jaune (programmer la condition)
-	while(ENCODER_Read(LEFT) < 18382)//ajuster la valeur au besoin
-	{
-		if(isStart)
-		{
-			MOTOR_SetSpeed(LEFT, vitesseRoueGauche);			//Changement de vitesse
-			MOTOR_SetSpeed(RIGHT, ajustementVitesseTournerDroite(60.96 + 5.89, 91.44 - 5.89, vitesseRoueGauche));
-		}else
-			break;
-		
-	}
-}
-
 void avancer1(float distance) //distance à parcourir en cm
 {
 	float vitesseMax = 0.4;
@@ -179,6 +136,57 @@ void avancer1(float distance) //distance à parcourir en cm
 	}
 }
 
+//Créer logique pour 2ème tournant (trouver la balle)
+//Créer logique pour Section2 (taper le verre)
+
+
+//Créer logique pour 1er tournant (tapis)
+float vitesseRoueDroite(float rayonDroit, float rayonGauche, float vitesseRoueGauche)
+{
+	//Calcul la distance que les 2 roues parcour
+	float roueDroiteDistance = (2 * PI * (rayonDroit)) / 4;
+	float roueGaucheDistance = (2 * PI * (rayonGauche)) / 4;
+
+	//Calcul la vitesse à laquelle la roue droite doit s'ajuster selon la vitesse de la roue gauche
+	float difference = roueDroiteDistance / roueGaucheDistance;
+	float vitesseRoueDroite = vitesseRoueGauche * difference;
+
+	return vitesseRoueDroite;
+}
+
+void setMoteurSection1()
+{
+	ENCODER_Reset(LEFT);
+  	ENCODER_Reset(RIGHT);
+	float vitesseRoueGauche = 0.3;
+	
+	switch (couleur)
+	{
+		case 1://Vert
+			MOTOR_SetSpeed(LEFT, vitesseRoueGauche);
+			MOTOR_SetSpeed(RIGHT, vitesseRoueDroite(30.48 + 5.89, 60.96 - 5.89, vitesseRoueGauche));
+			break;
+		case 2://Jaune
+			MOTOR_SetSpeed(LEFT, vitesseRoueGauche);
+			MOTOR_SetSpeed(RIGHT, vitesseRoueDroite(60.96 + 5.89, 91.44 - 5.89, vitesseRoueGauche));
+			break;
+		default:
+			break;
+	}
+}
+
+void section1Loop(){
+	int limiteEncoder = couleur == 1 ? 11833 : 18382;
+
+	setMoteurSection1();//appel demarage des moteurs
+
+	while (ENCODER_Read(LEFT) < limiteEncoder)
+	{
+        //Appel PID et ajustement
+	}
+
+	section = 2;
+}
 
 void changementVoie(float distanceDevant, float distanceCote)		//permet de changer de voie dans la section 9 ou 0
 {																	
@@ -208,14 +216,29 @@ void setup(){
 	//initialiser les senseurs ajoutés
 
 	pinMode(PIN_A4, INPUT);
-    pinMode(PIN_A5, INPUT);
+  pinMode(PIN_A5, INPUT);
 }
 
 void loop() {
-	//Appel CommencerTerminer
+  CommencerTerminer();  
+  if(isStart)
+  {
+    switch (section)
+    {
+    case 1://Premier tournant
+      	section1Loop();
+      	break;
+    case 2://Ligne droite
+      
+      break;
+    case 3://deuxième tournant
+      
+      break;
+    case 4://ligne droite
 
-	//Condition if start
-	//{
-	//	Logique
-	//}
+      break;
+    default:
+      break;
+    }
+	}
 }
