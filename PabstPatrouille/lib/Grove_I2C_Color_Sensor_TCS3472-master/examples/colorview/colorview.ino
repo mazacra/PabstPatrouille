@@ -1,18 +1,25 @@
-#include <Arduino.h>
-#include <LibRobus.h>
-#include <Adafruit_TCS34725.h>
+#include <Wire.h>
+#include "Adafruit_TCS34725.h"
 
+// Pick analog outputs, for the UNO these three work well
+// use ~560  ohm resistor between Red & Blue, ~1K for green (its brighter)
 #define redpin 3
 #define greenpin 5
 #define bluepin 6
+// for a common anode LED, connect the common pin to +5V
+// for common cathode, connect the common to ground
+
+// set to false if using a common cathode LED
 #define commonAnode true
-Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
+
+// our RGB -> eye-recognized gamma color
 byte gammatable[256];
 
+
+Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
+
 void setup() {
-	BoardInit(); //Init libraire LibRobus
-    
-	Serial.begin(9600);
+    Serial.begin(9600);
     Serial.println("Color View Test!");
 
     if (tcs.begin()) {
@@ -21,7 +28,9 @@ void setup() {
         Serial.println("No TCS34725 found ... check your connections");
         while (1); // halt!
     }
-	pinMode(redpin, OUTPUT);
+
+    // use these three pins to drive an LED
+    pinMode(redpin, OUTPUT);
     pinMode(greenpin, OUTPUT);
     pinMode(bluepin, OUTPUT);
 
@@ -42,8 +51,9 @@ void setup() {
     }
 }
 
+
 void loop() {
-	uint16_t clear, red, green, blue;
+    uint16_t clear, red, green, blue;
 
     tcs.setInterrupt(false);      // turn on LED
 
@@ -75,3 +85,4 @@ void loop() {
     analogWrite(greenpin, gammatable[(int)g]);
     analogWrite(bluepin, gammatable[(int)b]);
 }
+
