@@ -18,7 +18,7 @@ void loop() {
 
 
 uint8_t ledPin = 39;
-ADJDS311 color(ledpin);
+ADJDS311 color(ledPin);
 
 void setup(){
     Serial.begin(9600);
