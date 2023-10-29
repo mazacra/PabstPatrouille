@@ -29,6 +29,15 @@ float diffClic (){
 	return (clic0 - clic1)/2;
 }
 
+void demarrer(float vitesseG, float vitesseD){
+	ENCODER_Reset(LEFT);																//Reset encoder
+	ENCODER_Reset(RIGHT);																//Reset encoder
+
+	MOTOR_SetSpeed(LEFT, vitesseG);											//Changement de vitesse
+	MOTOR_SetSpeed(RIGHT, vitesseD);											//Changement de vitesse
+	
+}
+
 //Potentiellement à modifier pour qu'il avance toujours (on a pas de raison de s'arrêter pour l'instant)
 //Donc pourrait ce simplifier à allumer les moteurs, et on appelera notre PID ailleurs
 void avancer(){
