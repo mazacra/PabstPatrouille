@@ -4,13 +4,18 @@ const float DISTANCE_ENTRE_ROUE = 18.7;  //Valeur en cm
 const float CIRCONFERENCE_ROUE = 23.939;
 short couleur = 1;														//1=Vert, 2=Jaune
 short section = 1;														//1=TournantTapis, 2=ligneTaperVerre, 3=TournantBalle, 4=LigneSaut
+int tour = 0;
 
 void CommencerTerminer(){
-    if(ROBUS_IsBumper(3) || analogRead(PIN_A4) > 600){					//bumper ou sifflet pour démarrer
+    if(ROBUS_IsBumper(3)){					//bumper ou sifflet pour démarrer
         isStart = !isStart;
-    }
+		couleur = 1; //détecter couleur
+	}else if(analogRead(PIN_A4) > 600){
+		isStart = true;
+		couleur = 1; //détecter couleur
+	}
 
-	while(analogRead(PIN_A4) > 600){}									//ne démarre pas tant qu'il entends le sifflet
+	section = 1;
 }
 
 //Potentiellement inutile
@@ -184,8 +189,10 @@ void setMoteurSection1()
 	}
 }
 
+//Tournant Tapis
 void section1Loop(){
 	int limiteEncoder = couleur == 1 ? 11833 : 18382;
+	tour++;
 
 	setMoteurSection1();//appel demarage des moteurs
 
@@ -195,6 +202,65 @@ void section1Loop(){
 	}
 
 	section = 2;
+}
+
+//Taper balle
+void section2Loop(){
+	demarrer(0.2, 0.2);
+
+	while (true)
+	{
+		if(tour % 2 == 1)
+		{
+			/*
+			if(couleur == jaune){
+				if(ROBUS_ReadIR(1 ou 2 ou 3) > que X)
+					SERVO_SetAngle(1, 0);
+			}else{
+				if(ROBUS_ReadIR(0) > que X)
+					SERVO_SetAngle(1, 180);
+			}
+			*/
+		}
+		else
+		{
+			//Raccourcis
+			int ref = true /*Detecter couleur*/ ? 1 /*valeur bleu*/ : 2 /*valeur vert*/;
+			
+			if(true) //Distance IR > Distance IR < ref - 100
+			{
+				//Tourner a droite
+			}
+		}
+	}
+	
+}
+
+//Tournant blanc
+void section3Loop(){
+	SERVO_SetAngle(0, 25);
+
+	while (true)
+	{
+		switch (analogRead(A0))
+		{
+		case 1/* gauche */:
+			/* tourner a droite */
+			break;
+		case 2/* droite */:
+			/*trouner a gauche*/
+			break;
+		default:
+			/*avancer*/
+			break;
+		}		
+	}
+	
+	SERVO_SetAngle(0, 22);
+}
+
+void section4Loop(){
+
 }
 
 void changementVoie(float distanceDevant, float distanceCote)		//permet de changer de voie dans la section 9 ou 0
@@ -234,21 +300,21 @@ void loop() {
   {
     switch (section)
     {
-    case 1://Premier tournant
-      	section1Loop();
-      	break;
-    case 2://Ligne droite
-      
-      break;
-    case 3://deuxième tournant
-      
-      break;
-    case 4://ligne droite
-
-      break;
-    default:
-      break;
-    }
+    	case 1://Premier tournant
+      		section1Loop();
+      		break;
+    	case 2://Ligne droite
+			section2Loop();
+    	  	break;
+    	case 3://deuxième tournant
+			section3Loop();
+      		break;
+    	case 4://ligne droite
+			section4Loop();
+      		break;
+    	default:
+      		break;
+    	}
 	}
 }
 
