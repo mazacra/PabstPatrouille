@@ -1,10 +1,13 @@
 #include <LibRobus.h>
+#include <Adafruit_TCS34725.h>
+
 bool isStart;
 const float DISTANCE_ENTRE_ROUE = 18.7;  //Valeur en cm
 const float CIRCONFERENCE_ROUE = 23.939;
 short couleur = 1;														//1=Vert, 2=Jaune
 short section = 1;														//1=TournantTapis, 2=ligneTaperVerre, 3=TournantBalle, 4=LigneSaut
 int tour = 0;
+Adafruit_TCS34725 tcs = Adafruit_TCS34725();
 
 void CommencerTerminer(){
     if(ROBUS_IsBumper(3)){					//bumper ou sifflet pour démarrer
@@ -291,8 +294,32 @@ void setup(){
 	//initialiser les senseurs ajoutés
 
 	pinMode(PIN_A4, INPUT);
-  pinMode(PIN_A5, INPUT);
+  	pinMode(PIN_A5, INPUT);
 }
+
+//a deplacer au besoin
+int LectureCouleur(){
+	//Rouge = 1, Jaune = 2, Vert = 3, Bleu = 4
+	uint16_t r, g, b, c;
+	tcs.getRawData(&r, &g, &b, &c);
+	int couleurLue = 0;
+
+	//if avec des valeurs randoms car pas testé encore
+	if (r == 1 && g == 0 && b == 0)
+		couleurLue = 1;
+
+	else if (r == 1 && g == 1 && b == 0)
+		couleurLue = 2;
+
+	else if (r == 0 && g == 1 && b == 0)
+		couleurLue = 3;
+
+	else if (r == 0 && g == 0 && b == 1)
+		couleurLue = 4;
+
+	return couleurLue;
+}
+
 
 void loop() {
   CommencerTerminer();  
