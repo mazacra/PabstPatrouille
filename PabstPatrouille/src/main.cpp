@@ -113,17 +113,18 @@ void tDroite(int angle)				//angle en degré
 void avancer1(float distance) //distance à parcourir en cm
 {
 	Serial.println("avancer1");
-	float vitesseMax = 0.4;
-	int idelay = 300;
+	float vitesseMax = 0.6;
+	int idelay = 100;
   	float vitesse0 = 0.2;
 	float vitesse1 = 0.2;
 	float ponderation = 0.0001;
 	float distanceEncoder = (distance / CIRCONFERENCE_ROUE) * 3200;
+	Serial.println(distanceEncoder);
 
 	ENCODER_Reset(LEFT);
 	ENCODER_Reset(RIGHT);
 
-	while (ENCODER_Read(RIGHT) < distanceEncoder && ENCODER_Read(LEFT) < distanceEncoder)
+	while (!(ENCODER_Read(RIGHT) > distanceEncoder && ENCODER_Read(LEFT) > distanceEncoder))
 	{
         if(isStart)
 		{
@@ -131,11 +132,17 @@ void avancer1(float distance) //distance à parcourir en cm
 			MOTOR_SetSpeed(RIGHT, vitesse1);										//Changement de vitesse
 			delay(idelay);
 
-			vitesse0 = vitesseMax * sin(2 * PI * ENCODER_Read(LEFT) / distanceEncoder) + 0.2;	//À tester voir si l'accélération et décélération marche
-			vitesse1 = vitesseMax * sin(2 * PI * ENCODER_Read(RIGHT) / distanceEncoder) + 0.2;	//vrai vitesse max = 0.6
+			vitesse0 = vitesseMax * sin((PI * ENCODER_Read(LEFT)) / distanceEncoder) + 0.2;	//À tester voir si l'accélération et décélération marche
+			vitesse1 = vitesseMax * sin((PI * ENCODER_Read(RIGHT)) / distanceEncoder) + 0.2;	//vrai vitesse max = 0.6
 			
-			vitesse0 = (vitesse0 - diffClic() * ponderation);
-			vitesse1 = (vitesse1 + diffClic() * ponderation);
+			vitesse0 = (vitesse0 - diffClic()*ponderation);
+			vitesse1 = (vitesse1 + diffClic()*ponderation);
+
+			Serial.println(ENCODER_Read(LEFT));
+			Serial.println(ENCODER_Read(RIGHT));
+			Serial.println(distanceEncoder);
+			Serial.println(vitesse0);
+			Serial.println(vitesse1);
 		}
 	}
 }
@@ -168,7 +175,7 @@ void setMoteurSection1()
 	{
 		case 3://Vert
 			Serial.println("vert");
-			while(ENCODER_Read(LEFT) < 11563){
+			while(ENCODER_Read(LEFT) < 11150){
 				MOTOR_SetSpeed(LEFT, vitesseRoueGauche);
 				MOTOR_SetSpeed(RIGHT, vitesseRoueDroite(30.48 + 5.89, 60.96 - 5.89, vitesseRoueGauche));
 			}
@@ -235,9 +242,9 @@ void section1Loop(){
 
 	couleur = LectureCouleur();
 
-	setMoteurSection1();//appel demarage des moteurs
+	setMoteurSection1();
 
-	avancer1(61);
+	//avancer1(61);
 	
 	setMoteurSection1();
 
@@ -246,24 +253,24 @@ void section1Loop(){
 
 //Taper balle
 void section2Loop(){
-	demarrer(0.2, 0.2);
+	/*demarrer(0.2, 0.2);
 
 	while (true)
 	{
 		if(tour % 2 == 1)
 		{
-			/*if(couleur == jaune){
+			if(couleur == jaune){
 				if(ROBUS_ReadIR(1 ou 2 ou 3) > que X)
 					SERVO_SetAngle(1, 0);
 			}else{
 				if(ROBUS_ReadIR(0) > que X)
 					SERVO_SetAngle(1, 180);
-			}*/
+			}
 		}
 		else
 		{
-			//Raccourcis
-			int ref = true /*Detecter couleur*/ ? 1 /*valeur bleu*/ : 2 /*valeur vert*/;
+			Raccourcis
+			int ref = true Detecter couleur ? 1 valeur bleu : 2 valeur vert;
 			
 			if(true) //Distance IR > Distance IR < ref - 100
 			{
@@ -271,7 +278,7 @@ void section2Loop(){
 			}
 		}
 	}
-	section = 3;
+	section = 3;*/
 }
 
 //Tournant blanc
@@ -316,7 +323,6 @@ void loop() {
   CommencerTerminer();  
   if(isStart)
   {
-
 	section1Loop();
     /*switch (section)
     {
