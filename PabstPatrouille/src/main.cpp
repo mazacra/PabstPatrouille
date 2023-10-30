@@ -305,17 +305,17 @@ int LectureCouleur(){
 	int couleurLue = 0;
 
 	//if avec des valeurs randoms car pas testé encore
-	if (r == 1 && g == 0 && b == 0)
-		couleurLue = 1;
+	if (r == 1 && g == 1 && b == 0)
+		couleurLue = 1; // rouge
 
-	else if (r == 1 && g == 1 && b == 0)
-		couleurLue = 2;
+	else if (r == 2 && g == 1 && b == 1)
+		couleurLue = 2; // jaune
 
 	else if (r == 0 && g == 1 && b == 0)
-		couleurLue = 3;
+		couleurLue = 3; // vert
 
-	else if (r == 0 && g == 0 && b == 1)
-		couleurLue = 4;
+	else if (r == 0 && g == 1 && b == 1)
+		couleurLue = 4; // bleu
 
 	return couleurLue;
 }
