@@ -168,9 +168,10 @@ void setMoteurSection1()
 
 	ENCODER_Reset(LEFT);
   	ENCODER_Reset(RIGHT);
-	float vitesseRoueGauche = 0.3;
+	float vitesseRoueGauche = 0.5;
 	
 	Serial.println(couleur);
+
 	switch (couleur)
 	{
 		case 3://Vert
@@ -183,7 +184,7 @@ void setMoteurSection1()
 			break;
 		case 2://Jaune
 			Serial.println("jaune");
-			while (ENCODER_Read(LEFT) < 18382){
+			while (ENCODER_Read(LEFT) < 17900){
 				MOTOR_SetSpeed(LEFT, vitesseRoueGauche);
 				MOTOR_SetSpeed(RIGHT, vitesseRoueDroite(60.96 + 5.89, 91.44 - 5.89, vitesseRoueGauche));
 			}
@@ -215,23 +216,35 @@ void changementVoie(float distanceDevant, float distanceCote)		//permet de chang
 }
 
 int LectureCouleur(){
+	int couleurLue = 0;
 	uint16_t r, g, b, c;
 	tcs.getRawData(&r, &g, &b, &c);
-	int couleurLue = 0;
+	tcs.getRawData(&r, &g, &b, &c);
+
+	Serial.println(r);
+	Serial.println(g);
+	Serial.println(b);
 
 	if (r == 1 && g == 1 && b == 0)
+	{
 		couleurLue = 1; // rouge
-
-	else if (r == 2 && g == 1 && b == 1)
+		return couleurLue;
+	}
+	else if (r == 1 && g == 1 && b == 1)
+	{
 		couleurLue = 2; // jaune
-
+		return couleurLue;
+	}
 	else if (r == 0 && g == 1 && b == 0)
+	{
 		couleurLue = 3; // vert
-
+		return couleurLue;
+	}
 	else if (r == 0 && g == 1 && b == 1)
+	{
 		couleurLue = 4; // bleu
-
-	return couleurLue;
+		return couleurLue;
+	}
 }
 
 //Tournant + Tapis
@@ -240,16 +253,12 @@ void section1Loop(){
 	SERVO_SetAngle(1,50);
 	SERVO_SetAngle(0,112);
 
-	couleur = LectureCouleur();
-	delay(1000);
-
 	setMoteurSection1();
-	//delay(100);
 
 	avancer1(61);
 	
 	setMoteurSection1();
-	//delay(100);
+
 
 	section = 2;
 }
@@ -326,6 +335,8 @@ void loop() {
   CommencerTerminer();  
   if(isStart)
   {
+	couleur = LectureCouleur();
+
 	section1Loop();
     /*switch (section)
     {
