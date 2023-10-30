@@ -197,9 +197,9 @@ void setMoteurSection1()
 void changementVoie(float distanceDevant, float distanceCote)		//permet de changer de voie dans la section 9 ou 0
 {																	
 	float angle = atan(distanceCote / distanceDevant);
-
-	float distanceParcourutTournantDevant = DISTANCE_ENTRE_ROUE * sin(angle);			//Robot ne tourne pas sur place donc calcul des valeur qui nous fait decaler
-	float distanceParcourutTournantCote = DISTANCE_ENTRE_ROUE - (DISTANCE_ENTRE_ROUE * cos(angle));
+	float angleRad = angle * (PI/180);
+	float distanceParcourutTournantDevant = DISTANCE_ENTRE_ROUE * sin(angleRad);			//Robot ne tourne pas sur place donc calcul des valeur qui nous fait decaler
+	float distanceParcourutTournantCote = DISTANCE_ENTRE_ROUE - (DISTANCE_ENTRE_ROUE * cos(angleRad));
 
 	float distance = sqrt(pow(distanceDevant - distanceParcourutTournantDevant, 2) + pow(distanceCote - distanceParcourutTournantCote, 2));	//pytagore pour trouver l'hypotenuse
 
@@ -241,12 +241,15 @@ void section1Loop(){
 	SERVO_SetAngle(0,112);
 
 	couleur = LectureCouleur();
+	delay(1000);
 
 	setMoteurSection1();
+	//delay(100);
 
-	//avancer1(61);
+	avancer1(61);
 	
 	setMoteurSection1();
+	//delay(100);
 
 	section = 2;
 }
