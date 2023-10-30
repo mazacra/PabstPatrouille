@@ -4,7 +4,7 @@
 bool isStart;
 const float DISTANCE_ENTRE_ROUE = 18.7;  //Valeur en cm
 const float CIRCONFERENCE_ROUE = 23.939;
-short couleur = 1;														//1=Vert, 2=Jaune
+short couleur = 1;														//3=Vert, 2=Jaune
 short section = 1;														//1=TournantTapis, 2=ligneTaperVerre, 3=TournantBalle, 4=LigneSaut
 int tour = 0;
 Adafruit_TCS34725 tcs = Adafruit_TCS34725();
@@ -41,7 +41,7 @@ void demarrer(float vitesseG, float vitesseD){
 	ENCODER_Reset(LEFT);																//Reset encoder
 	ENCODER_Reset(RIGHT);																//Reset encoder
 
-	MOTOR_SetSpeed(LEFT, vitesseG);											//Changement de vitesse
+	MOTOR_SetSpeed(LEFT, vitesseG);												//Changement de vitesse
 	MOTOR_SetSpeed(RIGHT, vitesseD);											//Changement de vitesse
 	
 }
@@ -53,35 +53,19 @@ void avancer(){
   	float vitesse0 = 0.25;
 	float vitesse1 = 0.25;
 	float ponderation = 0.0001;
-	float cycle = 1;
 	
 	ENCODER_Reset(LEFT);																//Reset encoder
 	ENCODER_Reset(RIGHT);																//Reset encoder
 
-	while (ENCODER_Read(RIGHT) < 6750 && ENCODER_Read(LEFT) < 6750){
-		CommencerTerminer();
+    if(isStart)
+	{
+		MOTOR_SetSpeed(LEFT, vitesse0);												//Changement de vitesse
+		MOTOR_SetSpeed(RIGHT, vitesse1);											//Changement de vitesse
+		delay(idelay);
 
-        if(isStart){
-			MOTOR_SetSpeed(LEFT, vitesse0);											//Changement de vitesse
-			MOTOR_SetSpeed(RIGHT, vitesse1);											//Changement de vitesse
-			delay(idelay);
-			if(cycle < 1.8)
-			{
-				vitesse0 = (vitesse0 - diffClic()*ponderation) * cycle * 1.00452;
-				vitesse1 = (vitesse1 + diffClic()*ponderation) * cycle;
-			}
-			else
-			{
-				vitesse0 = (vitesse0 - diffClic()*ponderation) * 0.65;
-				vitesse1 = (vitesse1 + diffClic()*ponderation) * 0.65;
-			}
-
-			cycle = cycle * 1.3;
-		 }else
-            break;	
+		vitesse0 = (vitesse0 - diffClic()*ponderation);
+		vitesse1 = (vitesse1 + diffClic()*ponderation);
 	}
-
-	arret();																		//Arret
 }
 
 //Pas vraiment nécessaire dans Nascar, on tourne que à droite
@@ -126,15 +110,18 @@ void tDroite(int angle)				//angle en degré
 	}
 }
 
-//Créer logique pour Section1 (départ,jump)
 void avancer1(float distance) //distance à parcourir en cm
 {
+	Serial.println("avancer1");
 	float vitesseMax = 0.4;
 	int idelay = 300;
   	float vitesse0 = 0.2;
 	float vitesse1 = 0.2;
 	float ponderation = 0.0001;
 	float distanceEncoder = (distance / CIRCONFERENCE_ROUE) * 3200;
+
+	ENCODER_Reset(LEFT);
+	ENCODER_Reset(RIGHT);
 
 	while (ENCODER_Read(RIGHT) < distanceEncoder && ENCODER_Read(LEFT) < distanceEncoder)
 	{
@@ -153,9 +140,6 @@ void avancer1(float distance) //distance à parcourir en cm
 	}
 }
 
-//Créer logique pour 2ème tournant (trouver la balle)
-//Créer logique pour Section2 (taper le verre)
-
 
 //Créer logique pour 1er tournant (tapis)
 float vitesseRoueDroite(float rayonDroit, float rayonGauche, float vitesseRoueGauche)
@@ -173,36 +157,89 @@ float vitesseRoueDroite(float rayonDroit, float rayonGauche, float vitesseRoueGa
 
 void setMoteurSection1()
 {
+	Serial.println("setmoteursection1");
+
 	ENCODER_Reset(LEFT);
   	ENCODER_Reset(RIGHT);
 	float vitesseRoueGauche = 0.3;
 	
+	Serial.println(couleur);
 	switch (couleur)
 	{
-		case 1://Vert
-			MOTOR_SetSpeed(LEFT, vitesseRoueGauche);
-			MOTOR_SetSpeed(RIGHT, vitesseRoueDroite(30.48 + 5.89, 60.96 - 5.89, vitesseRoueGauche));
+		case 3://Vert
+			Serial.println("vert");
+			while(ENCODER_Read(LEFT) < 11563){
+				MOTOR_SetSpeed(LEFT, vitesseRoueGauche);
+				MOTOR_SetSpeed(RIGHT, vitesseRoueDroite(30.48 + 5.89, 60.96 - 5.89, vitesseRoueGauche));
+			}
+			Serial.println("fin");
 			break;
 		case 2://Jaune
-			MOTOR_SetSpeed(LEFT, vitesseRoueGauche);
-			MOTOR_SetSpeed(RIGHT, vitesseRoueDroite(60.96 + 5.89, 91.44 - 5.89, vitesseRoueGauche));
+			Serial.println("jaune");
+			while (ENCODER_Read(LEFT) < 18382){
+				MOTOR_SetSpeed(LEFT, vitesseRoueGauche);
+				MOTOR_SetSpeed(RIGHT, vitesseRoueDroite(60.96 + 5.89, 91.44 - 5.89, vitesseRoueGauche));
+			}
+			Serial.println("fin");
 			break;
 		default:
 			break;
 	}
 }
 
-//Tournant Tapis
+void changementVoie(float distanceDevant, float distanceCote)		//permet de changer de voie dans la section 9 ou 0
+{																	
+	float angle = atan(distanceCote / distanceDevant);
+
+	float distanceParcourutTournantDevant = DISTANCE_ENTRE_ROUE * sin(angle);			//Robot ne tourne pas sur place donc calcul des valeur qui nous fait decaler
+	float distanceParcourutTournantCote = DISTANCE_ENTRE_ROUE - (DISTANCE_ENTRE_ROUE * cos(angle));
+
+	float distance = sqrt(pow(distanceDevant - distanceParcourutTournantDevant, 2) + pow(distanceCote - distanceParcourutTournantCote, 2));	//pytagore pour trouver l'hypotenuse
+
+	//Si vert au jaune (programmer pour savoir sur quelle couleur on se trouve)
+	tGauche(angle);
+	avancer1(distance);
+	tDroite(angle);
+
+	//Si jaune au vert (programmer pour savoir sur quelle couleur on se trouve)
+	tDroite(angle);
+	avancer1(distance);
+	tGauche(angle);
+}
+
+int LectureCouleur(){
+	uint16_t r, g, b, c;
+	tcs.getRawData(&r, &g, &b, &c);
+	int couleurLue = 0;
+
+	if (r == 1 && g == 1 && b == 0)
+		couleurLue = 1; // rouge
+
+	else if (r == 2 && g == 1 && b == 1)
+		couleurLue = 2; // jaune
+
+	else if (r == 0 && g == 1 && b == 0)
+		couleurLue = 3; // vert
+
+	else if (r == 0 && g == 1 && b == 1)
+		couleurLue = 4; // bleu
+
+	return couleurLue;
+}
+
+//Tournant + Tapis
 void section1Loop(){
-	int limiteEncoder = couleur == 1 ? 11833 : 18382;
-	tour++;
+
+	SERVO_SetAngle(1,50);
+	SERVO_SetAngle(0,112);
+
+	couleur = LectureCouleur();
 
 	setMoteurSection1();//appel demarage des moteurs
 
-	while (ENCODER_Read(LEFT) < limiteEncoder)
-	{
-        //Appel PID et ajustement
-	}
+	avancer1(61);
+	
+	setMoteurSection1();
 
 	section = 2;
 }
@@ -215,15 +252,13 @@ void section2Loop(){
 	{
 		if(tour % 2 == 1)
 		{
-			/*
-			if(couleur == jaune){
+			/*if(couleur == jaune){
 				if(ROBUS_ReadIR(1 ou 2 ou 3) > que X)
 					SERVO_SetAngle(1, 0);
 			}else{
 				if(ROBUS_ReadIR(0) > que X)
 					SERVO_SetAngle(1, 180);
-			}
-			*/
+			}*/
 		}
 		else
 		{
@@ -236,7 +271,7 @@ void section2Loop(){
 			}
 		}
 	}
-	
+	section = 3;
 }
 
 //Tournant blanc
@@ -260,72 +295,30 @@ void section3Loop(){
 	}
 	
 	SERVO_SetAngle(0, 22);
+	section = 4;
 }
 
-void section4Loop(){
-
-}
-
-void changementVoie(float distanceDevant, float distanceCote)		//permet de changer de voie dans la section 9 ou 0
-{																	
-	float angle = atan(distanceCote / distanceDevant);
-
-	float distanceParcourutTournantDevant = DISTANCE_ENTRE_ROUE * sin(angle);			//Robot ne tourne pas sur place donc calcul des valeur qui nous fait decaler
-	float distanceParcourutTournantCote = DISTANCE_ENTRE_ROUE - (DISTANCE_ENTRE_ROUE * cos(angle));
-
-	float distance = sqrt(pow(distanceDevant - distanceParcourutTournantDevant, 2) + pow(distanceCote - distanceParcourutTournantCote, 2));	//pytagore pour trouver l'hypotenuse
-
-	//Si vert au jaune (programmer pour savoir sur quelle couleur on se trouve)
-	tGauche(angle);
-	avancer1(distance);
-	tDroite(angle);
-
-	//Si jaune au vert (programmer pour savoir sur quelle couleur on se trouve)
-	tDroite(angle);
-	avancer1(distance);
-	tGauche(angle);
-}
-
+void section4Loop(){}
 
 void setup(){
 	BoardInit();
 	Serial.begin(9600);
 
 	//initialiser les senseurs ajoutés
-
+	SERVO_Enable(0);
+	SERVO_Enable(1);
+	pinMode(PIN_A0, INPUT);
 	pinMode(PIN_A4, INPUT);
   	pinMode(PIN_A5, INPUT);
 }
-
-//a deplacer au besoin
-int LectureCouleur(){
-	//Rouge = 1, Jaune = 2, Vert = 3, Bleu = 4
-	uint16_t r, g, b, c;
-	tcs.getRawData(&r, &g, &b, &c);
-	int couleurLue = 0;
-
-	//if avec des valeurs randoms car pas testé encore
-	if (r == 1 && g == 1 && b == 0)
-		couleurLue = 1; // rouge
-
-	else if (r == 2 && g == 1 && b == 1)
-		couleurLue = 2; // jaune
-
-	else if (r == 0 && g == 1 && b == 0)
-		couleurLue = 3; // vert
-
-	else if (r == 0 && g == 1 && b == 1)
-		couleurLue = 4; // bleu
-
-	return couleurLue;
-}
-
 
 void loop() {
   CommencerTerminer();  
   if(isStart)
   {
-    switch (section)
+
+	section1Loop();
+    /*switch (section)
     {
     	case 1://Premier tournant
       		section1Loop();
@@ -341,7 +334,7 @@ void loop() {
       		break;
     	default:
       		break;
-    	}
+    	}*/
 	}
 }
 
