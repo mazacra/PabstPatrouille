@@ -251,32 +251,23 @@ void AjustementVoie(){
 
 	int couleurActuelle = LectureCouleur();
 
-	switch (couleurActuelle)
+	switch (couleurDepart)
 	{
 		//pt mettre un case 0 au cas ou il a rien capté, genre le faire avancer un peu et reessayer de lire la couleur
-		
-		case 1: //rouge
-			/* code */
-			switch (couleurDepart)
-			{
-				case 2: //jaune
-					/* code */
-					break;
-			
-				case 3: //vert
-					/* code */
-					break;
-			}
-			break;
-	
 		case 2: //jaune
 			/* code */
-			switch (couleurDepart)
+			switch (couleurActuelle)
 			{
-				case 2: //jaune
+				case 1: //rouge
 					break;
 			
+				case 2: //jaune
+					break;
+
 				case 3: //vert
+					break;
+			
+				case 4: //bleu
 					/* code */
 					break;
 			}
@@ -286,28 +277,22 @@ void AjustementVoie(){
 			/* code */
 			switch (couleurDepart)
 			{
-				case 2: //jaune
-					/* code */
+				case 1: //rouge
 					break;
 			
-				case 3: //vert
-					break;
-			}
-			break;
-	
-		case 4: //bleu
-			/* code */
-			switch (couleurDepart)
-			{
 				case 2: //jaune
-					/* code */
+					break;
+
+				case 3: //vert
 					break;
 			
-				case 3: //vert
+				case 4: //bleu
 					/* code */
 					break;
 			}
+			
 			break;
+			}
 	
 	}
 }
