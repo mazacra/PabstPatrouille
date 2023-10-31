@@ -238,6 +238,11 @@ void section2Loop(){
 
 //Tournant blanc
 void section3Loop(){
+	//1000+ 	: tous blanc
+	//730 		: milieu noir
+	//144 - 436	: gauche noir
+	//584 - 876 : droite noir
+
 	SERVO_SetAngle(0, 25);
 
 	while (true)
@@ -317,8 +322,6 @@ void loop() {
     	}
 	}
 }
-
-
 
 /*
 //fonction pour calibrer sensor de couleur
