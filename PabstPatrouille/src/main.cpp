@@ -119,7 +119,6 @@ void avancer1(float distance) //distance à parcourir en cm
 	float vitesse1 = 0.2;
 	float ponderation = 0.0001;
 	float distanceEncoder = (distance / CIRCONFERENCE_ROUE) * 3200;
-	Serial.println(distanceEncoder);
 
 	ENCODER_Reset(LEFT);
 	ENCODER_Reset(RIGHT);
@@ -137,12 +136,6 @@ void avancer1(float distance) //distance à parcourir en cm
 			
 			vitesse0 = (vitesse0 - diffClic()*ponderation);
 			vitesse1 = (vitesse1 + diffClic()*ponderation);
-
-			Serial.println(ENCODER_Read(LEFT));
-			Serial.println(ENCODER_Read(RIGHT));
-			Serial.println(distanceEncoder);
-			Serial.println(vitesse0);
-			Serial.println(vitesse1);
 		}
 	}
 }
@@ -176,7 +169,7 @@ void setMoteurSection1()
 	{
 		case 3://Vert
 			Serial.println("vert");
-			while(ENCODER_Read(LEFT) < 11150){
+			while(ENCODER_Read(LEFT) < 11250){
 				MOTOR_SetSpeed(LEFT, vitesseRoueGauche);
 				MOTOR_SetSpeed(RIGHT, vitesseRoueDroite(30.48 + 5.89, 60.96 - 5.89, vitesseRoueGauche));
 			}
@@ -184,9 +177,10 @@ void setMoteurSection1()
 			break;
 		case 2://Jaune
 			Serial.println("jaune");
-			while (ENCODER_Read(LEFT) < 17900){
+			while (ENCODER_Read(LEFT) < 17750){
 				MOTOR_SetSpeed(LEFT, vitesseRoueGauche);
-				MOTOR_SetSpeed(RIGHT, vitesseRoueDroite(60.96 + 5.89, 91.44 - 5.89, vitesseRoueGauche));
+				//MOTOR_SetSpeed(RIGHT, vitesseRoueDroite(60.96 + 5.89, 91.44 - 5.89, vitesseRoueGauche));
+				MOTOR_SetSpeed(RIGHT, 0.80 * vitesseRoueGauche);
 			}
 			Serial.println("fin");
 			break;
@@ -215,7 +209,8 @@ void changementVoie(float distanceDevant, float distanceCote)		//permet de chang
 	tGauche(angle);
 }
 
-int LectureCouleur(){
+int LectureCouleur()
+{
 	int couleurLue = 0;
 	uint16_t r, g, b, c;
 	tcs.getRawData(&r, &g, &b, &c);
@@ -254,45 +249,52 @@ void section1Loop(){
 	SERVO_SetAngle(0,112);
 
 	setMoteurSection1();
+	if(couleur == 3)
+	{
+		avancer1(61);
+	}
 
-	avancer1(61);
+	else
+	{
+		avancer1(70);
+	}
 	
 	setMoteurSection1();
-
-
+	arret();
 	section = 2;
 }
 
 //Taper balle
-void section2Loop(){
-	/*demarrer(0.2, 0.2);
-
-	while (true)
-	{
-		if(tour % 2 == 1)
-		{
-			if(couleur == jaune){
-				if(ROBUS_ReadIR(1 ou 2 ou 3) > que X)
-					SERVO_SetAngle(1, 0);
-			}else{
-				if(ROBUS_ReadIR(0) > que X)
-					SERVO_SetAngle(1, 180);
-			}
-		}
-		else
-		{
-			Raccourcis
-			int ref = true Detecter couleur ? 1 valeur bleu : 2 valeur vert;
-			
-			if(true) //Distance IR > Distance IR < ref - 100
-			{
-				//Tourner a droite
-			}
-		}
-	}
-	section = 3;*/
+void section2()
+{
+	demarrer(0.2, 0.2);
+	Serial.println("bonjour voici la section 2");
+    switch (couleur)
+    {
+    case 2: //jaune
+ 
+        while (true){
+            if (ROBUS_ReadIR(1) < 100)
+                break;
+        }
+ 
+        SERVO_SetAngle(1, 0);
+        
+        break;
+ 
+    case 3: //vert
+ 
+        while (true){
+            if (ROBUS_ReadIR(0) < 100)
+                break;
+        }
+        SERVO_SetAngle(1, 180);
+        
+        break;
+    }
+	SERVO_SetAngle(1,49);
+	section = 3;
 }
-
 //Tournant blanc
 void section3Loop(){
 	SERVO_SetAngle(0, 25);
@@ -317,7 +319,13 @@ void section3Loop(){
 	section = 4;
 }
 
-void section4Loop(){}
+void section4Loop()
+{
+	avancer1(10);
+	SERVO_SetAngle(0,112);
+
+
+}
 
 void setup(){
 	BoardInit();
@@ -336,17 +344,19 @@ void loop() {
   if(isStart)
   {
 	couleur = LectureCouleur();
-
-	section1Loop();
-    /*switch (section)
+	
+    switch (section)
     {
     	case 1://Premier tournant
       		section1Loop();
-      		break;
+			section = 2;
+			Serial.println("case = 1");
+      		//break;
     	case 2://Ligne droite
-			section2Loop();
+			section2();
+			Serial.println("case = 2");
     	  	break;
-    	case 3://deuxième tournant
+    	/*case 3://deuxième tournant
 			section3Loop();
       		break;
     	case 4://ligne droite
@@ -356,6 +366,7 @@ void loop() {
       		break;
     	}*/
 	}
+}
 }
 
 
