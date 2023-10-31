@@ -247,55 +247,76 @@ int LectureCouleur(){
 	}
 }
 
-void AjustementVoie(){
+// void AjustementVoie(){
 
-	int couleurActuelle = LectureCouleur();
+// 	int couleurActuelle = 0;
 
-	switch (couleurDepart)
-	{
-		//pt mettre un case 0 au cas ou il a rien capté, genre le faire avancer un peu et reessayer de lire la couleur
-		case 2: //jaune
-			/* code */
-			switch (couleurActuelle)
-			{
-				case 1: //rouge
-					break;
+// 	switch (couleurDepart)
+// 	{
+// 		//pt mettre un case 0 au cas ou il a rien capté, genre le faire avancer un peu et reessayer de lire la couleur
+// 		case 2: //jaune
+// 			switch (couleurActuelle)
+// 			{
+// 				case 0: 
+// 					couleurActuelle = LectureCouleur();
+// 					break;
+// 				case 1: //rouge
+// 				//tourne a droite
+// 					arret();
+
+// 					tDroite(90);
+
+// 					demarrer(0.2, 0.2)
+// ;
+// 					delay(2000);
+
+// 					arret();
+
+// 					tGauche(90);
+
+// 					couleurActuelle = 0;
+
+// 					break;
 			
-				case 2: //jaune
-					break;
+// 				case 2: //jaune
+// 				//il est dans la bonne voie, rien a faire
+// 					break;
 
-				case 3: //vert
-					break;
+// 				case 3: //vert
+// 				//tourne a gauche
+// 					break;
 			
-				case 4: //bleu
-					/* code */
-					break;
-			}
-			break;
+// 				case 4: //bleu
+// 				//tourne a gauche
+// 					/* code */
+// 					break;
+// 			}
+// 			break;
 	
-		case 3: //vert
-			/* code */
-			switch (couleurDepart)
-			{
-				case 1: //rouge
-					break;
+// 		case 3: //vert
+// 			switch (couleurDepart)
+// 			{
+// 				case 1: //rouge
+// 				//torune a droite
+// 					break;
 			
-				case 2: //jaune
-					break;
+// 				case 2: //jaune
+// 				//tourne a droite
+// 					break;
 
-				case 3: //vert
-					break;
+// 				case 3: //vert
+// 				//il est dans la bonne voie, rien a faire
+// 					break;
 			
-				case 4: //bleu
-					/* code */
-					break;
-			}
+// 				case 4: //bleu
+// 				//tourne a gauche
+// 					/* code */
+// 					break;
+// 			}
 
-			break;
-			}
-	
-	}
-
+// 			break;
+// 			}
+// 	}
 
 //Tournant + Tapis
 void section1Loop(){
@@ -315,6 +336,36 @@ void section1Loop(){
 
 //Taper balle
 void section2Loop(){
+
+	demarrer(0.2, 0.2);
+
+	switch (couleurDepart)
+	{
+	case 2: //jaune
+
+		while (true){
+			if (ROBUS_ReadIR(1) < 400)
+				break;
+		}
+
+		SERVO_SetAngle(1, 0);
+		
+		break;
+
+	case 3: //vert
+
+		while (true){
+			if (ROBUS_ReadIR(0) < 400)
+				break;
+		}
+		SERVO_SetAngle(1, 180);
+		
+		break;
+	}
+
+
+
+
 	/*demarrer(0.2, 0.2);
 
 	while (true)
