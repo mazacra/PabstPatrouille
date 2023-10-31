@@ -1,6 +1,9 @@
 #include <LibRobus.h>
 #include <Adafruit_TCS34725.h>
 
+#define IRGauche 0
+#define IRDroit 3
+
 bool isStart;
 const float DISTANCE_ENTRE_ROUE = 18.7;  //Valeur en cm
 const float CIRCONFERENCE_ROUE = 23.939;
@@ -42,7 +45,7 @@ void demarrer(float vitesseG, float vitesseD){
 	ENCODER_Reset(RIGHT);																//Reset encoder
 
 	MOTOR_SetSpeed(LEFT, vitesseG);												//Changement de vitesse
-	MOTOR_SetSpeed(RIGHT, vitesseD);											//Changement de vitesse
+	MOTOR_SetSpeed(RIGHT, vitesseD);										//Changement de vitesse
 	
 }
 
@@ -50,8 +53,8 @@ void demarrer(float vitesseG, float vitesseD){
 //Donc pourrait ce simplifier à allumer les moteurs, et on appelera notre PID ailleurs
 void avancer(){
   	int idelay = 300;
-  	float vitesse0 = 0.25;
-	float vitesse1 = 0.25;
+  	float vitesse0 = 0.20;
+	float vitesse1 = 0.20;
 	float ponderation = 0.0001;
 	
 	ENCODER_Reset(LEFT);																//Reset encoder
@@ -109,8 +112,8 @@ void avancer1(float distance) //distance à parcourir en cm
 	Serial.println("avancer1");
 	float vitesseMax = 0.6;
 	int idelay = 100;
-  	float vitesse0 = 0.2;
-	float vitesse1 = 0.2;
+  	float vitesse0 = 0.25;
+	float vitesse1 = 0.25;
 	float ponderation = 0.0001;
 	float distanceEncoder = (distance / CIRCONFERENCE_ROUE) * 3200;
 
@@ -222,7 +225,13 @@ int LectureCouleur()
 	Serial.println(g);
 	Serial.println(b);
 
-	if (r == 1 && g == 1 && b == 0)
+	if (r == 0 && g == 0 && b == 0)
+	{
+		couleurLue = 0; // rouge
+		return couleurLue;
+	}
+
+	else if (r == 1 && g == 1 && b == 0)
 	{
 		couleurLue = 1; // rouge
 		return couleurLue;
@@ -320,6 +329,7 @@ void section1Loop(){
 
 	SERVO_SetAngle(1,49);
 	SERVO_SetAngle(0,112);
+	delay(100);
 
 	setMoteurSection1();
 	if(couleur == 3)
@@ -340,37 +350,89 @@ void section1Loop(){
 //Taper balle
 void section2()
 {
+	bool verreTrouve = false;
+	int c = 1000;
 	demarrer(0.2, 0.2);
 	Serial.println("bonjour voici la section 2");
-    switch (couleur)
-    {
-    case 2: //jaune
- 
-        while (true){
-            if (ROBUS_ReadIR(1) < 100)
-                break;
-        }
- 
-        SERVO_SetAngle(1, 0);
-        
-        break;
- 
-    case 3: //vert
- 
-        while (true){
-            if (ROBUS_ReadIR(0) < 100)
-                break;
-        }
-        SERVO_SetAngle(1, 180);
-        
-        break;
-    }
+	Serial.println(couleur);
+	float distanceEncoder = (243.84 / CIRCONFERENCE_ROUE) * 3200;
+	Serial.println(distanceEncoder);
+
+	while( c != 0)
+	{
+		c = LectureCouleur();
+		Serial.println(c);
+		avancer();
+		if(!verreTrouve)
+		{
+			switch (couleur)
+			{
+			case 2: //jaune
+
+				Serial.println(ROBUS_ReadIR(IRDroit));
+				if (ROBUS_ReadIR(IRDroit) > 300)
+				{
+					SERVO_SetAngle(1, 0);
+					verreTrouve = true;
+					break;
+				}
+		
+			case 3: //vert
+		
+				if (ROBUS_ReadIR(IRGauche) > 300)
+				{
+					SERVO_SetAngle(1, 180);
+					verreTrouve = true;
+					break;
+				}
+			}
+		}
+	}
+	arret();
 	SERVO_SetAngle(1,49);
+	
 	section = 3;
 }
+	/*while( = c)
+	{
+		avancer();
+		if(!BalleTrouve)
+		switch (c)
+		{
+		case 2: //jaune
+	
+			while (true){
+				avancer();
+				Serial.println(ROBUS_ReadIR(IRDroit));
+				if (ROBUS_ReadIR(IRDroit) > 300){
+					break;
+				}
+			}
+	
+			SERVO_SetAngle(1, 0);
+			avancer();
+			break;
+	
+		case 3: //vert
+	
+			while (true){
+				avancer();
+				if (ROBUS_ReadIR(IRGauche) > 300){
+					break;
+				}
+			}
+			SERVO_SetAngle(1, 180);
+			avancer();
+			break;
+		}
+		
+	}
+	SERVO_SetAngle(1,49);
+	section = 3;
+}*/
 //Tournant blanc
-void section3Loop()
-{
+void section3Loop(){
+	SERVO_SetAngle(1,49);
 	SERVO_SetAngle(0, 25);
 	arret();
 	if(couleur == 2)
@@ -457,67 +519,3 @@ void loop() {
     	}*/
 	}
 }
-//}
-
-
-
-/*
-//fonction pour calibrer sensor de couleur
-#include <ADJDS311.h>
-
-uint8_t ledPin = 39;
-ADJDS311 color(ledpin);
-
-void setup(){
-    Serial.begin(9600);
-    color.init();
-    color.ledOn();
-    // ::init() preset values in the registers.
-    // The S311 and S371 have different gains.
-    // Here you can use ::calibrate() to adjust the sensor's gains.
-    // You can also use ::setintegrationtime() and ::setcapacitor() to adjust the sensor manually
-
-    color.calibrate();  // first make sure the sensor faces a white surface at the focal point
-}
-
-
-void loop() {
-  Serial.print("R: "); Serial.print(color.readRed());Serial.print(", ");
-  Serial.print("G: "); Serial.print(color.readGreen());Serial.print(", ");
-  Serial.print("B: "); Serial.print(color.readBlue());Serial.print(", ");
-  Serial.print("C: "); Serial.print(color.readClear());
-  Serial.println();
-  
-  delay(500);
-}
-
-//valeurs de calibration lors de la compilation avec feuille de papier blanc
-unsigned int RedLow = ;
-unsigned int RedHigh = ;
-unsigned int GreenLow = ;
-unsigned int GreenHigh = ;
-unsigned int BlueLow = ;
-unsigned int BlueHigh = ;
-unsigned int ClearLow = ;
-unsigned int ClearHigh = ;
-
-//Determiner sur quelle couleur le robot est
-void loop(){
- if (RedHigh && GreenHigh > BlueHigh && ClearHigh)
- {
-	Serial.println("couleur jaune");
- }
- if (GreenHigh > RedHigh && BlueHigh && ClearHigh)
- {
-	Serial.println("couleur vert");
- }
- if (BlueHigh > GreenHigh && RedHigh && ClearHigh)
- {
-	Serial.println("couleur bleue");
- }
- if (RedHigh > GreenHigh && BlueHigh && ClearHigh)
- {
-	Serial.println("couleur rouge");
- }
-}
-*/
