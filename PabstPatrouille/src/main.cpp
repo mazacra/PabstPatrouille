@@ -78,15 +78,11 @@ void tGauche(int angle)				//angle en degré
 	float vitesseRoueDroite = 0.15;
 
 	int valeurEncoder = (2 * PI * DISTANCE_ENTRE_ROUE * angle / 360) * 3200 / CIRCONFERENCE_ROUE;
-	
+	Serial.println(valeurEncoder);
 	while (ENCODER_Read(RIGHT) < valeurEncoder)				
 	{
-		CommencerTerminer();
-    	if(isStart){
 			MOTOR_SetSpeed(LEFT, 0);							//Changement de vitesses
 			MOTOR_SetSpeed(RIGHT, vitesseRoueDroite);			//Changement de vitesses
-		}else
-        	break;
 	}	
 }
 
@@ -100,13 +96,11 @@ void tDroite(int angle)				//angle en degré
 	int valeurEncoder = (2 * PI * DISTANCE_ENTRE_ROUE * angle / 360) * 3200 / CIRCONFERENCE_ROUE;
 
 	while (ENCODER_Read(LEFT) < valeurEncoder)				
-	{			
-		CommencerTerminer();			
-        if(isStart){			
+	{	
+		Serial.println("tourner");				
 			MOTOR_SetSpeed(LEFT, vitesseRoueGauche);			//Changement de vitesse
 			MOTOR_SetSpeed(RIGHT, 0);							//Changement de vitesse
-		}else
-        	break;
+
 	}
 }
 
@@ -190,23 +184,31 @@ void setMoteurSection1()
 }
 
 void changementVoie(float distanceDevant, float distanceCote)		//permet de changer de voie dans la section 9 ou 0
-{																	
-	float angle = atan(distanceCote / distanceDevant);
-	float angleRad = angle * (PI/180);
+{			
+	//xcouleur = LectureCouleur();														
+	float angleRad = atan(distanceCote / distanceDevant);
+	float angle = (angleRad * 180) / PI;
 	float distanceParcourutTournantDevant = DISTANCE_ENTRE_ROUE * sin(angleRad);			//Robot ne tourne pas sur place donc calcul des valeur qui nous fait decaler
 	float distanceParcourutTournantCote = DISTANCE_ENTRE_ROUE - (DISTANCE_ENTRE_ROUE * cos(angleRad));
-
+	Serial.println(angle);
 	float distance = sqrt(pow(distanceDevant - distanceParcourutTournantDevant, 2) + pow(distanceCote - distanceParcourutTournantCote, 2));	//pytagore pour trouver l'hypotenuse
 
-	//Si vert au jaune (programmer pour savoir sur quelle couleur on se trouve)
-	tGauche(angle);
-	avancer1(distance);
-	tDroite(angle);
+	if(couleur == 3 )
+	{
+		tGauche(angle);
+		avancer1(distance);
+		tDroite(angle);
+	}
 
 	//Si jaune au vert (programmer pour savoir sur quelle couleur on se trouve)
-	tDroite(angle);
-	avancer1(distance);
-	tGauche(angle);
+	if(couleur == 2)
+	{
+		Serial.println("1111");
+		tDroite(angle);
+		avancer1(distance);
+		tGauche(angle);
+	}
+	
 }
 
 int LectureCouleur()
@@ -367,24 +369,37 @@ void section2()
 	section = 3;
 }
 //Tournant blanc
-void section3Loop(){
+void section3Loop()
+{
 	SERVO_SetAngle(0, 25);
-
-	while (true)
+	arret();
+	if(couleur == 2)
+		setMoteurSection1();
+		
+	if(couleur == 3)
 	{
-		switch (analogRead(A0))
-		{
-		case 1/* gauche */:
-			/* tourner a droite */
-			break;
-		case 2/* droite */:
-			/*trouner a gauche*/
-			break;
-		default:
-			/*avancer*/
-			break;
-		}		
+		avancer1(30.48);
+		tDroite(45);
 	}
+	while (LectureCouleur() == 0)
+	{
+		if(analogRead(A0) <= 450)	
+		{
+			MOTOR_SetSpeed(LEFT, 0.25);
+			MOTOR_SetSpeed(RIGHT, 0.28);
+		}
+		else if(analogRead(A0) > 700 && analogRead(A0) < 750)
+		{
+			MOTOR_SetSpeed(LEFT, 0.25);
+			MOTOR_SetSpeed(RIGHT, 0.25);
+		}
+		else 
+		{
+			MOTOR_SetSpeed(LEFT, 0.28);
+			MOTOR_SetSpeed(RIGHT, 0.25);
+		}
+	}
+	arret();
 	
 	SERVO_SetAngle(0, 22);
 	section = 4;
@@ -392,10 +407,9 @@ void section3Loop(){
 
 void section4Loop()
 {
-	avancer1(10);
 	SERVO_SetAngle(0,112);
-
-
+	avancer1(121.92);
+	changementVoie(121.92, 30.48);
 }
 
 void setup(){
@@ -414,9 +428,14 @@ void loop() {
   CommencerTerminer();  
   if(isStart)
   {
-	couleur = LectureCouleur();
+	//couleur = LectureCouleur();
+	couleur = 2;
+	//tGauche(90);
+	section4Loop();
+	Serial.println("fini");
+
 	
-    switch (section)
+    /*switch (section)
     {
     	case 1://Premier tournant
       		section1Loop();
@@ -438,7 +457,7 @@ void loop() {
     	}*/
 	}
 }
-}
+//}
 
 
 
