@@ -242,10 +242,81 @@ int LectureCouleur()
 	}
 }
 
+// void AjustementVoie(){
+
+// 	int couleurActuelle = 0;
+
+// 	switch (couleurDepart)
+// 	{
+// 		//pt mettre un case 0 au cas ou il a rien capté, genre le faire avancer un peu et reessayer de lire la couleur
+// 		case 2: //jaune
+// 			switch (couleurActuelle)
+// 			{
+// 				case 0: 
+// 					couleurActuelle = LectureCouleur();
+// 					break;
+// 				case 1: //rouge
+// 				//tourne a droite
+// 					arret();
+
+// 					tDroite(90);
+
+// 					demarrer(0.2, 0.2)
+// ;
+// 					delay(2000);
+
+// 					arret();
+
+// 					tGauche(90);
+
+// 					couleurActuelle = 0;
+
+// 					break;
+			
+// 				case 2: //jaune
+// 				//il est dans la bonne voie, rien a faire
+// 					break;
+
+// 				case 3: //vert
+// 				//tourne a gauche
+// 					break;
+			
+// 				case 4: //bleu
+// 				//tourne a gauche
+// 					/* code */
+// 					break;
+// 			}
+// 			break;
+	
+// 		case 3: //vert
+// 			switch (couleurDepart)
+// 			{
+// 				case 1: //rouge
+// 				//torune a droite
+// 					break;
+			
+// 				case 2: //jaune
+// 				//tourne a droite
+// 					break;
+
+// 				case 3: //vert
+// 				//il est dans la bonne voie, rien a faire
+// 					break;
+			
+// 				case 4: //bleu
+// 				//tourne a gauche
+// 					/* code */
+// 					break;
+// 			}
+
+// 			break;
+// 			}
+// 	}
+
 //Tournant + Tapis
 void section1Loop(){
 
-	SERVO_SetAngle(1,50);
+	SERVO_SetAngle(1,49);
 	SERVO_SetAngle(0,112);
 
 	setMoteurSection1();
