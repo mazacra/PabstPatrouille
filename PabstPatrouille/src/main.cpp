@@ -247,12 +247,75 @@ int LectureCouleur(){
 	}
 }
 
+void AjustementVoie(){
 
+	int couleurActuelle = LectureCouleur();
+
+	switch (couleurActuelle)
+	{
+		//pt mettre un case 0 au cas ou il a rien capté, genre le faire avancer un peu et reessayer de lire la couleur
+		
+		case 1: //rouge
+			/* code */
+			switch (couleurDepart)
+			{
+				case 2: //jaune
+					/* code */
+					break;
+			
+				case 3: //vert
+					/* code */
+					break;
+			}
+			break;
+	
+		case 2: //jaune
+			/* code */
+			switch (couleurDepart)
+			{
+				case 2: //jaune
+					break;
+			
+				case 3: //vert
+					/* code */
+					break;
+			}
+			break;
+	
+		case 3: //vert
+			/* code */
+			switch (couleurDepart)
+			{
+				case 2: //jaune
+					/* code */
+					break;
+			
+				case 3: //vert
+					break;
+			}
+			break;
+	
+		case 4: //bleu
+			/* code */
+			switch (couleurDepart)
+			{
+				case 2: //jaune
+					/* code */
+					break;
+			
+				case 3: //vert
+					/* code */
+					break;
+			}
+			break;
+	
+	}
+}
 
 //Tournant + Tapis
 void section1Loop(){
 
-	SERVO_SetAngle(1,50);
+	SERVO_SetAngle(1,49);
 	SERVO_SetAngle(0,112);
 
 	setMoteurSection1();
