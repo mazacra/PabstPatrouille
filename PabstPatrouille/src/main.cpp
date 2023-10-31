@@ -1,7 +1,7 @@
 #include <LibRobus.h>
 #include <Adafruit_TCS34725.h>
 
-#define IRGauche 0
+#define IRGauche 1
 #define IRDroit 3
 
 bool isStart;
@@ -10,7 +10,7 @@ const float CIRCONFERENCE_ROUE = 23.939;
 short couleur = 1;														//3=Vert, 2=Jaune
 short section = 1;														//1=TournantTapis, 2=ligneTaperVerre, 3=TournantBalle, 4=LigneSaut
 int tour = 0;
-Adafruit_TCS34725 tcs = Adafruit_TCS34725();
+Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_2_4MS, TCS34725_GAIN_16X);
 
 void CommencerTerminer(){
     if(ROBUS_IsBumper(3)){					//bumper ou sifflet pour démarrer
@@ -212,9 +212,10 @@ void changementVoie(float distanceDevant, float distanceCote)		//permet de chang
 	tGauche(angle);
 }
 
+// rajouter une condition si bug pour capter
 int LectureCouleur()
 {
-	int couleurLue = 0;
+	int couleurLue = 20;
 	uint16_t r, g, b, c;
 	tcs.getRawData(&r, &g, &b, &c);
 	tcs.getRawData(&r, &g, &b, &c);
@@ -223,32 +224,38 @@ int LectureCouleur()
 	Serial.println(g);
 	Serial.println(b);
 
-	if (r == 0 && g == 0 && b == 0)
+	if ((15 < r && r < 24) && (17 < g  && g < 26) && (13 < b && b < 19))
 	{
-		couleurLue = 0; // rouge
+		couleurLue = 0; // blanc
 		return couleurLue;
 	}
 
-	else if (r == 1 && g == 1 && b == 0)
+	else if ((8 < r && r < 14) && (7 < g && g < 12) && (6 < b && b < 11))
 	{
 		couleurLue = 1; // rouge
 		return couleurLue;
 	}
-	else if (r == 1 && g == 1 && b == 1)
+	else if ((14 < r && r < 22) && (15 < g && g < 21) && (8 < b && b < 13))
 	{
 		couleurLue = 2; // jaune
 		return couleurLue;
 	}
-	else if (r == 0 && g == 1 && b == 0)
+	else if ((6 < r && r < 9) && (9 < g && g < 12) && (7 < b && b < 10))
 	{
 		couleurLue = 3; // vert
 		return couleurLue;
 	}
-	else if (r == 0 && g == 1 && b == 1)
+	else if ((5 < r && r < 8) && (8 < g && g < 12) && (8 < b && b < 11))
 	{
 		couleurLue = 4; // bleu
 		return couleurLue;
 	}
+	else if ((8 < r && r > 15) && ( 8 < g && g > 17) && (7 < b && b > 14)) // aproximatif
+	{
+		couleurLue = 5; //noir
+		return couleurLue;
+	}
+
 }
 
 // void AjustementVoie(){
@@ -325,11 +332,16 @@ int LectureCouleur()
 //Tournant + Tapis
 void section1Loop(){
 
+	Serial.println("bonjour voici la section 1");
+
 	SERVO_SetAngle(1,49);
 	SERVO_SetAngle(0,112);
 	delay(100);
 
+	avancer1(16.5);
+	
 	setMoteurSection1();
+
 	if(couleur == 3)
 	{
 		avancer1(61);
@@ -337,7 +349,7 @@ void section1Loop(){
 
 	else
 	{
-		avancer1(70);
+		avancer1(63);
 	}
 	
 	setMoteurSection1();
@@ -367,7 +379,6 @@ void section2()
 			{
 			case 2: //jaune
 
-				Serial.println(ROBUS_ReadIR(IRDroit));
 				if (ROBUS_ReadIR(IRDroit) > 300)
 				{
 					SERVO_SetAngle(1, 0);
@@ -477,7 +488,7 @@ void loop() {
   if(isStart)
   {
 	couleur = LectureCouleur();
-	
+
     switch (section)
     {
     	case 1://Premier tournant
