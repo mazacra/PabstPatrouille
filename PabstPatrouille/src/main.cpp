@@ -4,7 +4,7 @@
 bool isStart;
 const float DISTANCE_ENTRE_ROUE = 18.7;  //Valeur en cm
 const float CIRCONFERENCE_ROUE = 23.939;
-short couleur = 1;														//3=Vert, 2=Jaune
+short couleurDepart = 1;														//3=Vert, 2=Jaune
 short section = 1;														//1=TournantTapis, 2=ligneTaperVerre, 3=TournantBalle, 4=LigneSaut
 int tour = 0;
 Adafruit_TCS34725 tcs = Adafruit_TCS34725();
@@ -12,10 +12,10 @@ Adafruit_TCS34725 tcs = Adafruit_TCS34725();
 void CommencerTerminer(){
     if(ROBUS_IsBumper(3)){					//bumper ou sifflet pour démarrer
         isStart = !isStart;
-		couleur = 1; //détecter couleur
+		couleurDepart = 1; //détecter couleur
 	}else if(analogRead(PIN_A4) > 600){
 		isStart = true;
-		couleur = 1; //détecter couleur
+		couleurDepart = 1; //détecter couleur
 	}
 
 	section = 1;
@@ -170,9 +170,9 @@ void setMoteurSection1()
   	ENCODER_Reset(RIGHT);
 	float vitesseRoueGauche = 0.5;
 	
-	Serial.println(couleur);
+	Serial.println(couleurDepart);
 
-	switch (couleur)
+	switch (couleurDepart)
 	{
 		case 3://Vert
 			Serial.println("vert");
@@ -246,6 +246,8 @@ int LectureCouleur(){
 		return couleurLue;
 	}
 }
+
+
 
 //Tournant + Tapis
 void section1Loop(){
@@ -335,7 +337,7 @@ void loop() {
   CommencerTerminer();  
   if(isStart)
   {
-	couleur = LectureCouleur();
+	couleurDepart = LectureCouleur();
 
 	section1Loop();
     /*switch (section)
