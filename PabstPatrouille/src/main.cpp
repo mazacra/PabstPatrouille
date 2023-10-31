@@ -290,12 +290,12 @@ void AjustementVoie(){
 					/* code */
 					break;
 			}
-			
+
 			break;
 			}
 	
 	}
-}
+
 
 //Tournant + Tapis
 void section1Loop(){
