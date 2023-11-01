@@ -470,6 +470,25 @@ void section4Loop()
 	avancer1(91.92);
 	changementVoie(121.92, 60.96);
 }
+void section5loop()
+{
+	while(true)
+	{
+		MOTOR_SetSpeed(LEFT, 0.41);
+		MOTOR_SetSpeed(RIGHT, 0.4);	
+		
+		if(ROBUS_ReadIR(3) < 200)
+		{
+			while(ROBUS_ReadIR(3) < 200)
+			{
+				MOTOR_SetSpeed(RIGHT, 0.2);
+			}
+		}
+	}
+
+	
+}
+
 
 void setup(){
 	BoardInit();
@@ -509,6 +528,10 @@ void loop() {
     	case 4://ligne droite
 			section4Loop();
       		break;
+		case 5: //suivre mur
+			section5loop();
+			break;
+
     	default:
       		break;
     	}
