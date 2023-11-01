@@ -57,9 +57,6 @@ void avancer(){
 	float vitesse1 = 0.20;
 	float ponderation = 0.0001;
 	
-	ENCODER_Reset(LEFT);																//Reset encoder
-	ENCODER_Reset(RIGHT);																//Reset encoder
-
     if(isStart)
 	{
 		MOTOR_SetSpeed(LEFT, vitesse0);												//Changement de vitesse
@@ -176,8 +173,8 @@ void setMoteurSection1()
 			Serial.println("jaune");
 			while (ENCODER_Read(LEFT) < 17750){
 				MOTOR_SetSpeed(LEFT, vitesseRoueGauche);
-				//MOTOR_SetSpeed(RIGHT, vitesseRoueDroite(60.96 + 5.89, 91.44 - 5.89, vitesseRoueGauche));
-				MOTOR_SetSpeed(RIGHT, 0.79 * vitesseRoueGauche);
+				MOTOR_SetSpeed(RIGHT, vitesseRoueDroite(60.96 + 5.89, 91.44 - 5.89, vitesseRoueGauche));
+				//MOTOR_SetSpeed(RIGHT, 0.78 * vitesseRoueGauche);
 			}
 			Serial.println("fin");
 			break;
@@ -257,7 +254,7 @@ int LectureCouleur()
 		couleurLue = 5; //noir
 		return couleurLue;
 	}*/
-
+	return couleurLue;
 }
 
 // void AjustementVoie(){
@@ -372,15 +369,32 @@ void section2()
 
 	while( c != 0)
 	{
+		ENCODER_Reset(LEFT);
+		ENCODER_Reset(RIGHT);
+
 		c = LectureCouleur();
+		Serial.println("couleur = ");
 		Serial.println(c);
-		avancer();
+
+		float vGauche = c == 2 ? 0.21 : 0.2; 
+		float vDroit = c == 3 ? 0.21 : 0.2; 
+
+		demarrer(vGauche,vDroit);
+
+		/*if (c = 2)
+		{
+			demarrer(0.21, 0.20);
+		}
+		else
+		{
+			demarrer(0.20, 0.21);
+		}*/
+
 		if(!verreTrouve)
 		{
 			switch (couleur)
 			{
 			case 2: //jaune
-
 				if (ROBUS_ReadIR(IRDroit) > 300)
 				{
 					SERVO_SetAngle(1, 0);
@@ -389,7 +403,6 @@ void section2()
 				}
 		
 			case 3: //vert
-		
 				if (ROBUS_ReadIR(IRGauche) > 300)
 				{
 					SERVO_SetAngle(1, 180);
@@ -404,43 +417,7 @@ void section2()
 	
 	section = 3;
 }
-	/*while( = c)
-	{
-		avancer();
-		if(!BalleTrouve)
-		switch (c)
-		{
-		case 2: //jaune
-	
-			while (true){
-				avancer();
-				Serial.println(ROBUS_ReadIR(IRDroit));
-				if (ROBUS_ReadIR(IRDroit) > 300){
-					break;
-				}
-			}
-	
-			SERVO_SetAngle(1, 0);
-			avancer();
-			break;
-	
-		case 3: //vert
-	
-			while (true){
-				avancer();
-				if (ROBUS_ReadIR(IRGauche) > 300){
-					break;
-				}
-			}
-			SERVO_SetAngle(1, 180);
-			avancer();
-			break;
-		}
-		
-	}
-	SERVO_SetAngle(1,49);
-	section = 3;
-}*/
+
 //Tournant blanc
 void section3Loop(){
 	Serial.println("Section 3");
