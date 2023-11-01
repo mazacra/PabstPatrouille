@@ -3,22 +3,21 @@
 
 #define IRGauche 1
 #define IRDroit 3
+#define DISTANCE_ENTRE_ROUE 18.7
+#define CIRCONFERENCE_ROUE 23.939
+#define VITESSE_INITIALE 0.2
 
 bool isStart;
-const float DISTANCE_ENTRE_ROUE = 18.7;  //Valeur en cm
-const float CIRCONFERENCE_ROUE = 23.939;
-short couleur = 1;														//3=Vert, 2=Jaune
-short section = 1;														//1=TournantTapis, 2=ligneTaperVerre, 3=TournantBalle, 4=LigneSaut
+short couleur;	//3=Vert, 2=Jaune
+short section = 1;	//1=TournantTapis, 2=ligneTaperVerre, 3=TournantBalle, 4=LigneSaut
 int tour = 0;
 Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_2_4MS, TCS34725_GAIN_16X);
 
 void CommencerTerminer(){
     if(ROBUS_IsBumper(3)){					//bumper ou sifflet pour démarrer
         isStart = !isStart;
-		couleur = 1; //détecter couleur
 	}else if(analogRead(PIN_A4) > 600){
 		isStart = true;
-		couleur = 1; //détecter couleur
 	}
 
 	section = 1;
@@ -41,11 +40,11 @@ float diffClic (){
 }
 
 void demarrer(float vitesseG, float vitesseD){
-	ENCODER_Reset(LEFT);																//Reset encoder
-	ENCODER_Reset(RIGHT);																//Reset encoder
+	ENCODER_Reset(LEFT);	//Reset encoder
+	ENCODER_Reset(RIGHT);	//Reset encoder
 
-	MOTOR_SetSpeed(LEFT, vitesseG);												//Changement de vitesse
-	MOTOR_SetSpeed(RIGHT, vitesseD);										//Changement de vitesse
+	MOTOR_SetSpeed(LEFT, vitesseG);		//Changement de vitesse
+	MOTOR_SetSpeed(RIGHT, vitesseD);	//Changement de vitesse
 	
 }
 
@@ -57,13 +56,13 @@ void avancer(){
 	float vitesse1 = 0.20;
 	float ponderation = 0.0001;
 	
-	ENCODER_Reset(LEFT);																//Reset encoder
-	ENCODER_Reset(RIGHT);																//Reset encoder
+	ENCODER_Reset(LEFT);	//Reset encoder
+	ENCODER_Reset(RIGHT);	//Reset encoder
 
     if(isStart)
 	{
-		MOTOR_SetSpeed(LEFT, vitesse0);												//Changement de vitesse
-		MOTOR_SetSpeed(RIGHT, vitesse1);											//Changement de vitesse
+		MOTOR_SetSpeed(LEFT, vitesse0);		//Changement de vitesse
+		MOTOR_SetSpeed(RIGHT, vitesse1);	//Changement de vitesse
 		delay(idelay);
 
 		vitesse0 = (vitesse0 - diffClic()*ponderation);
@@ -110,10 +109,10 @@ void tDroite(int angle)				//angle en degré
 void avancer1(float distance) //distance à parcourir en cm
 {
 	Serial.println("avancer1");
-	float vitesseMax = 0.6;
 	int idelay = 100;
-  	float vitesse0 = 0.25;
-	float vitesse1 = 0.25;
+	float vitesseMax = 0.6;
+  	float vitesseG = 0.25;
+	float vitesseD = 0.25;
 	float ponderation = 0.0001;
 	float distanceEncoder = (distance / CIRCONFERENCE_ROUE) * 3200;
 
@@ -124,15 +123,15 @@ void avancer1(float distance) //distance à parcourir en cm
 	{
         if(isStart)
 		{
-			MOTOR_SetSpeed(LEFT, vitesse0);											//Changement de vitesse
-			MOTOR_SetSpeed(RIGHT, vitesse1);										//Changement de vitesse
+			MOTOR_SetSpeed(LEFT, vitesseG);											//Changement de vitesse
+			MOTOR_SetSpeed(RIGHT, vitesseD);										//Changement de vitesse
 			delay(idelay);
 
-			vitesse0 = vitesseMax * sin((PI * ENCODER_Read(LEFT)) / distanceEncoder) + 0.2;	//À tester voir si l'accélération et décélération marche
-			vitesse1 = vitesseMax * sin((PI * ENCODER_Read(RIGHT)) / distanceEncoder) + 0.2;	//vrai vitesse max = 0.6
+			vitesseG = vitesseMax * sin((PI * ENCODER_Read(LEFT)) / distanceEncoder) + VITESSE_INITIALE;	//À tester voir si l'accélération et décélération marche
+			vitesseD = vitesseMax * sin((PI * ENCODER_Read(RIGHT)) / distanceEncoder) + VITESSE_INITIALE;	//vrai vitesse max = 0.6
 			
-			vitesse0 = (vitesse0 - diffClic()*ponderation);
-			vitesse1 = (vitesse1 + diffClic()*ponderation);
+			vitesseG = (vitesseG - diffClic()*ponderation);
+			vitesseD = (vitesseD + diffClic()*ponderation);
 		}
 	}
 }
@@ -146,8 +145,8 @@ float vitesseRoueDroite(float rayonDroit, float rayonGauche, float vitesseRoueGa
 	float roueGaucheDistance = (2 * PI * (rayonGauche)) / 4;
 
 	//Calcul la vitesse à laquelle la roue droite doit s'ajuster selon la vitesse de la roue gauche
-	float difference = roueDroiteDistance / roueGaucheDistance;
-	float vitesseRoueDroite = vitesseRoueGauche * difference;
+	float rapport = roueDroiteDistance / roueGaucheDistance;
+	float vitesseRoueDroite = vitesseRoueGauche * rapport;
 
 	return vitesseRoueDroite;
 }
@@ -196,13 +195,6 @@ void changementVoie(float distanceDevant, float distanceCote)		//permet de chang
 	Serial.println(angle);
 	float distance = sqrt(pow(distanceDevant - distanceParcourutTournantDevant, 2) + pow(distanceCote - distanceParcourutTournantCote, 2));	//pytagore pour trouver l'hypotenuse
 
-	if(couleur == 3 )
-	{
-		tGauche(angle);
-		avancer1(distance);
-		tDroite(angle);
-	}
-
 	//Si jaune au vert (programmer pour savoir sur quelle couleur on se trouve)
 	if(couleur == 2)
 	{
@@ -237,16 +229,19 @@ int LectureCouleur()
 		couleurLue = 1; // rouge
 		return couleurLue;
 	}
+
 	else if ((14 < r && r < 22) && (15 < g && g < 21) && (8 < b && b < 13))
 	{
 		couleurLue = 2; // jaune
 		return couleurLue;
 	}
+
 	else if ((6 < r && r < 9) && (9 < g && g < 12) && (7 < b && b < 10))
 	{
 		couleurLue = 3; // vert
 		return couleurLue;
 	}
+
 	else if ((5 < r && r < 8) && (8 < g && g < 12) && (8 < b && b < 11))
 	{
 		couleurLue = 4; // bleu
@@ -447,6 +442,8 @@ void section3Loop(){
 	//730 		: milieu noir
 	//144 - 436	: gauche noir
 	//584 - 876 : droite noir
+	float vitesseGauche = 0.5;
+	float vitesseDroite = 0.5;
 
 	Serial.println("Section 3");
 	SERVO_SetAngle(1,49);
@@ -464,21 +461,23 @@ void section3Loop(){
 	while (LectureCouleur() != 2)
 	{
 		Serial.println(analogRead(A0));
+		MOTOR_SetSpeed(LEFT, vitesseGauche);
+		MOTOR_SetSpeed(RIGHT, vitesseDroite);
 
 		if(analogRead(A0) <= 450)	
 		{
-			MOTOR_SetSpeed(LEFT, 0.5);
-			MOTOR_SetSpeed(RIGHT, 0.20);
+			vitesseGauche = 0.5;
+			vitesseDroite = 0.2;
 		}
 		else if(analogRead(A0) > 700 && analogRead(A0) < 750)
 		{
-			MOTOR_SetSpeed(LEFT, 0.20);
-			MOTOR_SetSpeed(RIGHT, 0.20);
+			vitesseGauche = 0.2;
+			vitesseDroite = 0.2;
 		}
-		else 
+		else if(analogRead(A0) > 500)
 		{
-			MOTOR_SetSpeed(LEFT, 0.20);
-			MOTOR_SetSpeed(RIGHT, 0.5);
+			vitesseGauche = 0.2;
+			vitesseDroite = 0.5;
 		}
 	}
 	arret();
@@ -508,12 +507,11 @@ void setup(){
 }
 
 void loop() {
-  CommencerTerminer();  
+  CommencerTerminer(); 
+
   if(isStart)
   {
 	couleur = LectureCouleur();
-
-	
 
 	switch (section)
     {
