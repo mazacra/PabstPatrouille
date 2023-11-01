@@ -133,6 +133,30 @@ void avancer1(float distance) //distance à parcourir en cm
 	}
 }
 
+void vitesseConstante(float distance, float vitesseg,float vitessed) //distance à parcourir en cm
+{
+	int idelay = 100;
+  	float vitesseG = vitesseg;
+	float vitesseD = vitessed;
+	float ponderation = 0.0001;
+	float distanceEncoder = (distance / CIRCONFERENCE_ROUE) * 3200;
+
+	ENCODER_Reset(LEFT);
+	ENCODER_Reset(RIGHT);
+
+	while (!(ENCODER_Read(RIGHT) > distanceEncoder && ENCODER_Read(LEFT) > distanceEncoder))
+	{
+        if(isStart)
+		{
+			MOTOR_SetSpeed(LEFT, vitesseG);											//Changement de vitesse
+			MOTOR_SetSpeed(RIGHT, vitesseD);										//Changement de vitesse
+			delay(idelay);
+			
+			vitesseG = (vitesseG - diffClic()*ponderation);
+			vitesseD = (vitesseD + diffClic()*ponderation);
+		}
+	}
+}
 
 //Créer logique pour 1er tournant (tapis)
 float vitesseRoueDroite(float rayonDroit, float rayonGauche, float vitesseRoueGauche)
@@ -338,12 +362,12 @@ void section1Loop(){
 
 	if(couleur == 3)
 	{
-		avancer1(61);
+		vitesseConstante(59, 0.2, 0.2);
 	}
 
 	else
 	{
-		avancer1(63);
+		vitesseConstante(60, 0.2, 0.2);
 	}
 	
 	setMoteurSection1();
@@ -371,8 +395,8 @@ void section2()
 		Serial.println("couleur = ");
 		Serial.println(c);
 
-		float vGauche = c == 2 ? 0.21 : 0.2; 
-		float vDroit = c == 3 ? 0.21 : 0.2; 
+		float vGauche = c == 2 ? 0.22 : 0.2; 
+		float vDroit = c == 3 ? 0.22 : 0.2; 
 
 		demarrer(vGauche,vDroit);
 
@@ -398,7 +422,7 @@ void section2()
 				}
 		
 			case 3: //vert
-				if (ROBUS_ReadIR(IRGauche) > 300)
+				if (ROBUS_ReadIR(IRGauche) > 150)
 				{
 					SERVO_SetAngle(1, 180);
 					verreTrouve = true;
@@ -443,22 +467,22 @@ void section3Loop(){
 
 		if(analogRead(A0) <= 450)	
 		{
-			vitesseGauche = 0.5;
-			vitesseDroite = 0.2;
+			vitesseGauche = 0.15;
+			vitesseDroite = 0.1;
 		}
 		else if(analogRead(A0) > 700 && analogRead(A0) < 750)
 		{
-			vitesseGauche = 0.2;
-			vitesseDroite = 0.2;
+			vitesseGauche = 0.1;
+			vitesseDroite = 0.1;
 		}
 		else if(analogRead(A0) > 500)
 		{
-			vitesseGauche = 0.2;
-			vitesseDroite = 0.5;
+			vitesseGauche = 0.1;
+			vitesseDroite = 0.15;
 		}
 	}
-	arret();
-	
+
+	tDroite(45);
 	SERVO_SetAngle(0, 22);
 	section = 4;
 }
@@ -489,6 +513,7 @@ void loop() {
   if(isStart)
   {
 	couleur = LectureCouleur();
+
 
 	switch (section)
     {
