@@ -489,11 +489,33 @@ void section3Loop(){
 
 void section4Loop()
 {
-	avancer1(30);
-	SERVO_SetAngle(0,112);
-	avancer1(91.92);
-	changementVoie(121.92, 60.96);
+	// avancer1(30);
+	// SERVO_SetAngle(0,112);
+	// avancer1(91.92);
+	// changementVoie(121.92, 60.96);
+
+  arret();
+
+  SERVO_SetAngle(0,112);
+
+  vitesseConstante(120, 0.2, 0.2);
+
+  arret();
+
+  tDroite(45);
+
+  avancer();
+
+  while (ROBUS_ReadIR(IRDroit) < 300){
+    //boucle infini pour qu'il continu d'avancer tant qu'il est pas pret du mur
+  }
+
+  arret();
+
+  section = 5;
+  
 }
+
 void section5loop()
 {
 	while(true)
