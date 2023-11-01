@@ -1,13 +1,16 @@
 #include <LibRobus.h>
 #include <Adafruit_TCS34725.h>
 
+#define IRGauche 1
+#define IRDroit 3
+
 bool isStart;
 const float DISTANCE_ENTRE_ROUE = 18.7;  //Valeur en cm
 const float CIRCONFERENCE_ROUE = 23.939;
 short couleur = 1;														//3=Vert, 2=Jaune
 short section = 1;														//1=TournantTapis, 2=ligneTaperVerre, 3=TournantBalle, 4=LigneSaut
 int tour = 0;
-Adafruit_TCS34725 tcs = Adafruit_TCS34725();
+Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_2_4MS, TCS34725_GAIN_16X);
 
 void CommencerTerminer(){
     if(ROBUS_IsBumper(3)){					//bumper ou sifflet pour démarrer
@@ -42,7 +45,7 @@ void demarrer(float vitesseG, float vitesseD){
 	ENCODER_Reset(RIGHT);																//Reset encoder
 
 	MOTOR_SetSpeed(LEFT, vitesseG);												//Changement de vitesse
-	MOTOR_SetSpeed(RIGHT, vitesseD);											//Changement de vitesse
+	MOTOR_SetSpeed(RIGHT, vitesseD);										//Changement de vitesse
 	
 }
 
@@ -50,8 +53,8 @@ void demarrer(float vitesseG, float vitesseD){
 //Donc pourrait ce simplifier à allumer les moteurs, et on appelera notre PID ailleurs
 void avancer(){
   	int idelay = 300;
-  	float vitesse0 = 0.25;
-	float vitesse1 = 0.25;
+  	float vitesse0 = 0.20;
+	float vitesse1 = 0.20;
 	float ponderation = 0.0001;
 	
 	ENCODER_Reset(LEFT);																//Reset encoder
@@ -78,15 +81,11 @@ void tGauche(int angle)				//angle en degré
 	float vitesseRoueDroite = 0.15;
 
 	int valeurEncoder = (2 * PI * DISTANCE_ENTRE_ROUE * angle / 360) * 3200 / CIRCONFERENCE_ROUE;
-	
+	Serial.println(valeurEncoder);
 	while (ENCODER_Read(RIGHT) < valeurEncoder)				
 	{
-		CommencerTerminer();
-    	if(isStart){
 			MOTOR_SetSpeed(LEFT, 0);							//Changement de vitesses
 			MOTOR_SetSpeed(RIGHT, vitesseRoueDroite);			//Changement de vitesses
-		}else
-        	break;
 	}	
 }
 
@@ -100,13 +99,11 @@ void tDroite(int angle)				//angle en degré
 	int valeurEncoder = (2 * PI * DISTANCE_ENTRE_ROUE * angle / 360) * 3200 / CIRCONFERENCE_ROUE;
 
 	while (ENCODER_Read(LEFT) < valeurEncoder)				
-	{			
-		CommencerTerminer();			
-        if(isStart){			
+	{	
+		Serial.println("tourner");				
 			MOTOR_SetSpeed(LEFT, vitesseRoueGauche);			//Changement de vitesse
 			MOTOR_SetSpeed(RIGHT, 0);							//Changement de vitesse
-		}else
-        	break;
+
 	}
 }
 
@@ -115,8 +112,8 @@ void avancer1(float distance) //distance à parcourir en cm
 	Serial.println("avancer1");
 	float vitesseMax = 0.6;
 	int idelay = 100;
-  	float vitesse0 = 0.2;
-	float vitesse1 = 0.2;
+  	float vitesse0 = 0.25;
+	float vitesse1 = 0.25;
 	float ponderation = 0.0001;
 	float distanceEncoder = (distance / CIRCONFERENCE_ROUE) * 3200;
 
@@ -180,7 +177,7 @@ void setMoteurSection1()
 			while (ENCODER_Read(LEFT) < 17750){
 				MOTOR_SetSpeed(LEFT, vitesseRoueGauche);
 				//MOTOR_SetSpeed(RIGHT, vitesseRoueDroite(60.96 + 5.89, 91.44 - 5.89, vitesseRoueGauche));
-				MOTOR_SetSpeed(RIGHT, 0.80 * vitesseRoueGauche);
+				MOTOR_SetSpeed(RIGHT, 0.79 * vitesseRoueGauche);
 			}
 			Serial.println("fin");
 			break;
@@ -190,28 +187,37 @@ void setMoteurSection1()
 }
 
 void changementVoie(float distanceDevant, float distanceCote)		//permet de changer de voie dans la section 9 ou 0
-{																	
-	float angle = atan(distanceCote / distanceDevant);
-	float angleRad = angle * (PI/180);
+{			
+	//xcouleur = LectureCouleur();														
+	float angleRad = atan(distanceCote / distanceDevant);
+	float angle = (angleRad * 180) / PI;
 	float distanceParcourutTournantDevant = DISTANCE_ENTRE_ROUE * sin(angleRad);			//Robot ne tourne pas sur place donc calcul des valeur qui nous fait decaler
 	float distanceParcourutTournantCote = DISTANCE_ENTRE_ROUE - (DISTANCE_ENTRE_ROUE * cos(angleRad));
-
+	Serial.println(angle);
 	float distance = sqrt(pow(distanceDevant - distanceParcourutTournantDevant, 2) + pow(distanceCote - distanceParcourutTournantCote, 2));	//pytagore pour trouver l'hypotenuse
 
-	//Si vert au jaune (programmer pour savoir sur quelle couleur on se trouve)
-	tGauche(angle);
-	avancer1(distance);
-	tDroite(angle);
+	if(couleur == 3 )
+	{
+		tGauche(angle);
+		avancer1(distance);
+		tDroite(angle);
+	}
 
 	//Si jaune au vert (programmer pour savoir sur quelle couleur on se trouve)
-	tDroite(angle);
-	avancer1(distance);
-	tGauche(angle);
+	if(couleur == 2)
+	{
+		Serial.println("1111");
+		tDroite(angle);
+		avancer1(distance);
+		tGauche(angle);
+	}
+	
 }
 
+// rajouter une condition si bug pour capter
 int LectureCouleur()
 {
-	int couleurLue = 0;
+	int couleurLue = 20;
 	uint16_t r, g, b, c;
 	tcs.getRawData(&r, &g, &b, &c);
 	tcs.getRawData(&r, &g, &b, &c);
@@ -220,26 +226,38 @@ int LectureCouleur()
 	Serial.println(g);
 	Serial.println(b);
 
-	if (r == 1 && g == 1 && b == 0)
+	if ((15 < r && r < 24) && (17 < g  && g < 26) && (13 < b && b < 19))
+	{
+		couleurLue = 0; // blanc
+		return couleurLue;
+	}
+
+	else if ((8 < r && r < 14) && (7 < g && g < 12) && (6 < b && b < 11))
 	{
 		couleurLue = 1; // rouge
 		return couleurLue;
 	}
-	else if (r == 1 && g == 1 && b == 1)
+	else if ((14 < r && r < 22) && (15 < g && g < 21) && (8 < b && b < 13))
 	{
 		couleurLue = 2; // jaune
 		return couleurLue;
 	}
-	else if (r == 0 && g == 1 && b == 0)
+	else if ((6 < r && r < 9) && (9 < g && g < 12) && (7 < b && b < 10))
 	{
 		couleurLue = 3; // vert
 		return couleurLue;
 	}
-	else if (r == 0 && g == 1 && b == 1)
+	else if ((5 < r && r < 8) && (8 < g && g < 12) && (8 < b && b < 11))
 	{
 		couleurLue = 4; // bleu
 		return couleurLue;
 	}
+	/*else if ((8 < r && r > 15) && ( 8 < g && g > 17) && (7 < b && b > 14)) // aproximatif
+	{
+		couleurLue = 5; //noir
+		return couleurLue;
+	}*/
+
 }
 
 // void AjustementVoie(){
@@ -316,10 +334,16 @@ int LectureCouleur()
 //Tournant + Tapis
 void section1Loop(){
 
+	Serial.println("bonjour voici la section 1");
+
 	SERVO_SetAngle(1,49);
 	SERVO_SetAngle(0,112);
+	delay(100);
 
+	avancer1(16.5);
+	
 	setMoteurSection1();
+
 	if(couleur == 3)
 	{
 		avancer1(61);
@@ -327,7 +351,7 @@ void section1Loop(){
 
 	else
 	{
-		avancer1(70);
+		avancer1(63);
 	}
 	
 	setMoteurSection1();
@@ -338,34 +362,85 @@ void section1Loop(){
 //Taper balle
 void section2()
 {
+	bool verreTrouve = false;
+	int c = 1000;
 	demarrer(0.2, 0.2);
 	Serial.println("bonjour voici la section 2");
-    switch (couleur)
-    {
-    case 2: //jaune
- 
-        while (true){
-            if (ROBUS_ReadIR(1) < 100)
-                break;
-        }
- 
-        SERVO_SetAngle(1, 0);
-        
-        break;
- 
-    case 3: //vert
- 
-        while (true){
-            if (ROBUS_ReadIR(0) < 100)
-                break;
-        }
-        SERVO_SetAngle(1, 180);
-        
-        break;
-    }
+	Serial.println(couleur);
+	float distanceEncoder = (243.84 / CIRCONFERENCE_ROUE) * 3200;
+	Serial.println(distanceEncoder);
+
+	while( c != 0)
+	{
+		c = LectureCouleur();
+		Serial.println(c);
+		avancer();
+		if(!verreTrouve)
+		{
+			switch (couleur)
+			{
+			case 2: //jaune
+
+				if (ROBUS_ReadIR(IRDroit) > 300)
+				{
+					SERVO_SetAngle(1, 0);
+					verreTrouve = true;
+					break;
+				}
+		
+			case 3: //vert
+		
+				if (ROBUS_ReadIR(IRGauche) > 300)
+				{
+					SERVO_SetAngle(1, 180);
+					verreTrouve = true;
+					break;
+				}
+			}
+		}
+	}
+	arret();
 	SERVO_SetAngle(1,49);
+	
 	section = 3;
 }
+	/*while( = c)
+	{
+		avancer();
+		if(!BalleTrouve)
+		switch (c)
+		{
+		case 2: //jaune
+	
+			while (true){
+				avancer();
+				Serial.println(ROBUS_ReadIR(IRDroit));
+				if (ROBUS_ReadIR(IRDroit) > 300){
+					break;
+				}
+			}
+	
+			SERVO_SetAngle(1, 0);
+			avancer();
+			break;
+	
+		case 3: //vert
+	
+			while (true){
+				avancer();
+				if (ROBUS_ReadIR(IRGauche) > 300){
+					break;
+				}
+			}
+			SERVO_SetAngle(1, 180);
+			avancer();
+			break;
+		}
+		
+	}
+	SERVO_SetAngle(1,49);
+	section = 3;
+}*/
 //Tournant blanc
 void section3Loop(){
 	//1000+ 	: tous blanc
@@ -373,23 +448,40 @@ void section3Loop(){
 	//144 - 436	: gauche noir
 	//584 - 876 : droite noir
 
+	Serial.println("Section 3");
+	SERVO_SetAngle(1,49);
 	SERVO_SetAngle(0, 25);
+	arret();
 
-	while (true)
+	if(couleur == 2)
+		setMoteurSection1();
+		
+	if(couleur == 3)
 	{
-		switch (analogRead(A0))
-		{
-		case 1/* gauche */:
-			/* tourner a droite */
-			break;
-		case 2/* droite */:
-			/*trouner a gauche*/
-			break;
-		default:
-			/*avancer*/
-			break;
-		}		
+		avancer1(30.48);
+		tDroite(45);
 	}
+	while (LectureCouleur() != 2)
+	{
+		Serial.println(analogRead(A0));
+
+		if(analogRead(A0) <= 450)	
+		{
+			MOTOR_SetSpeed(LEFT, 0.5);
+			MOTOR_SetSpeed(RIGHT, 0.20);
+		}
+		else if(analogRead(A0) > 700 && analogRead(A0) < 750)
+		{
+			MOTOR_SetSpeed(LEFT, 0.20);
+			MOTOR_SetSpeed(RIGHT, 0.20);
+		}
+		else 
+		{
+			MOTOR_SetSpeed(LEFT, 0.20);
+			MOTOR_SetSpeed(RIGHT, 0.5);
+		}
+	}
+	arret();
 	
 	SERVO_SetAngle(0, 22);
 	section = 4;
@@ -397,10 +489,10 @@ void section3Loop(){
 
 void section4Loop()
 {
-	avancer1(10);
+	avancer1(30);
 	SERVO_SetAngle(0,112);
-
-
+	avancer1(91.92);
+	changementVoie(121.92, 60.96);
 }
 
 void setup(){
@@ -420,8 +512,10 @@ void loop() {
   if(isStart)
   {
 	couleur = LectureCouleur();
+
 	
-    switch (section)
+
+	switch (section)
     {
     	case 1://Premier tournant
       		section1Loop();
@@ -430,78 +524,18 @@ void loop() {
       		//break;
     	case 2://Ligne droite
 			section2();
+			Serial.println(section);
 			Serial.println("case = 2");
-    	  	break;
-    	/*case 3://deuxième tournant
+    	  	//break;
+    	case 3://deuxième tournant
 			section3Loop();
-      		break;
+			Serial.println("case = 3");
+      		//break;
     	case 4://ligne droite
 			section4Loop();
       		break;
     	default:
       		break;
-    	}*/
+    	}
 	}
 }
-}
-
-/*
-//fonction pour calibrer sensor de couleur
-#include <ADJDS311.h>
-
-uint8_t ledPin = 39;
-ADJDS311 color(ledpin);
-
-void setup(){
-    Serial.begin(9600);
-    color.init();
-    color.ledOn();
-    // ::init() preset values in the registers.
-    // The S311 and S371 have different gains.
-    // Here you can use ::calibrate() to adjust the sensor's gains.
-    // You can also use ::setintegrationtime() and ::setcapacitor() to adjust the sensor manually
-
-    color.calibrate();  // first make sure the sensor faces a white surface at the focal point
-}
-
-
-void loop() {
-  Serial.print("R: "); Serial.print(color.readRed());Serial.print(", ");
-  Serial.print("G: "); Serial.print(color.readGreen());Serial.print(", ");
-  Serial.print("B: "); Serial.print(color.readBlue());Serial.print(", ");
-  Serial.print("C: "); Serial.print(color.readClear());
-  Serial.println();
-  
-  delay(500);
-}
-
-//valeurs de calibration lors de la compilation avec feuille de papier blanc
-unsigned int RedLow = ;
-unsigned int RedHigh = ;
-unsigned int GreenLow = ;
-unsigned int GreenHigh = ;
-unsigned int BlueLow = ;
-unsigned int BlueHigh = ;
-unsigned int ClearLow = ;
-unsigned int ClearHigh = ;
-
-//Determiner sur quelle couleur le robot est
-void loop(){
- if (RedHigh && GreenHigh > BlueHigh && ClearHigh)
- {
-	Serial.println("couleur jaune");
- }
- if (GreenHigh > RedHigh && BlueHigh && ClearHigh)
- {
-	Serial.println("couleur vert");
- }
- if (BlueHigh > GreenHigh && RedHigh && ClearHigh)
- {
-	Serial.println("couleur bleue");
- }
- if (RedHigh > GreenHigh && BlueHigh && ClearHigh)
- {
-	Serial.println("couleur rouge");
- }
-}
-*/
