@@ -527,7 +527,7 @@ void section5loop()
 		{
 			while(ROBUS_ReadIR(3) < 200)
 			{
-				MOTOR_SetSpeed(RIGHT, 0.2);
+				MOTOR_SetSpeed(RIGHT, 0.1);
 			}
 		}
 	}
