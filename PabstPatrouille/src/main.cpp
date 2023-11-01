@@ -29,7 +29,7 @@ void arret(){
 	MOTOR_SetSpeed(RIGHT, 0);
   	ENCODER_Reset(LEFT);
   	ENCODER_Reset(RIGHT);
-	delay(100);
+	delay(500);
 }
 
 float diffClic (){
@@ -82,6 +82,21 @@ void tGauche(int angle)				//angle en degré
 	{
 			MOTOR_SetSpeed(LEFT, 0);							//Changement de vitesses
 			MOTOR_SetSpeed(RIGHT, vitesseRoueDroite);			//Changement de vitesses
+	}	
+}
+
+void tGaucheRecule(int angle)				//angle en degré
+{
+    ENCODER_Reset(LEFT);							//Reset encoder
+    ENCODER_Reset(RIGHT);							//Reset encoder
+	float vitesseRoueGauche = -0.15;
+
+	int valeurEncoder = (((-2 * PI * DISTANCE_ENTRE_ROUE * angle) / 360) * 3200) / CIRCONFERENCE_ROUE;
+	Serial.println(valeurEncoder);
+	while (ENCODER_Read(RIGHT) > valeurEncoder)				
+	{
+			MOTOR_SetSpeed(LEFT, vitesseRoueGauche);							//Changement de vitesses
+			MOTOR_SetSpeed(RIGHT, 0);			//Changement de vitesses
 	}	
 }
 
@@ -442,7 +457,7 @@ void section2()
 
 //Tournant blanc
 void section3Loop(){
-	//1000+ 	: tous blanc
+	/*//1000+ 	: tous blanc
 	//730 		: milieu noir
 	//144 - 436	: gauche noir
 	//584 - 876 : droite noir
@@ -454,7 +469,7 @@ void section3Loop(){
 	SERVO_SetAngle(0, 25);
 	arret();
 
-	/*if(couleur == 2)
+	if(couleur == 2)
 	{
 
 		avancer1(60);
@@ -468,7 +483,7 @@ void section3Loop(){
 		avancer1(60);
 		tDroite(90);
 		avancer1(30);
-	}*/
+	}
 	while (LectureCouleur() != 2)
 	{
 		Serial.println(analogRead(A0));
@@ -493,27 +508,108 @@ void section3Loop(){
 			//vitesseGauche = 0.15;
 			//vitesseDroite = 0.1;
 		}
-		/*else if(analogRead(A0) > 500 && analogRead(A0) < 590)
+		else if(analogRead(A0) > 500 && analogRead(A0) < 590)
 		{
 			Serial.println("45 en reculant");
 			tDroiteRecule(45);
-		}*/
+		}
 		
 	}
 
 	tDroite(45);
 	SERVO_SetAngle(0, 22);
 	section = 4;
+}*/
+
+//LIGNE MILIEU = 730
+//LIGNE GAUCHE = 436
+//LIGNE DROITE = 876
+//LIGNE GAUCHE ET MILIEU = 144
+//LIGNE DROITE ET MILIEU = 584
+ 
+  arret();  
+  SERVO_SetAngle(1,131);
+  SERVO_SetAngle(0,112);
+
+	ENCODER_Reset(LEFT);							//Reset encoder
+  	ENCODER_Reset(RIGHT);							
+ 
+  if(couleur == 2)
+	{
+
+		avancer1(58);
+		tDroite(90);
+		avancer1(80);
+		SERVO_SetAngle(0, 25);
+	}
+		
+	if(couleur == 3)
+	{
+		avancer1(60);
+		tDroite(90);
+		avancer1(35);
+		SERVO_SetAngle(0, 25);
+	}
+ 
+  while (LectureCouleur() != 2){ //tant qu'il est encore dans la section 3
+	avancer();
+ 
+    while (analogRead(A0) > 720 && analogRead(A0) < 740){//si la ligne noir est capté par CENTRE
+    	avancer();
+    }
+ 
+    while (analogRead(A0) > 426 && analogRead(A0) < 446){//si la ligne noir est capté par GAUCHE --> changer valeurs
+    	demarrer(-0.15,0);
+    	delay(250);
+    	vitesseConstante(12, 0.2, 0.2);
+    	arret();
+		demarrer(0,-0.15);
+    	delay(200);
+    	
+    }
+ 
+    while (analogRead(A0) > 866 && analogRead(A0) < 886){//si la ligne noir est capté par DROITE --> changer valeurs
+    	demarrer(0,-0.15);
+    	delay(250);
+		//tGaucheRecule(1);
+		//arret();
+    	vitesseConstante(12, 0.2, 0.2);
+    	arret();
+		   	demarrer(-0.15,0);
+    	delay(200);
+		
+    }
+ 
+      while (analogRead(A0) > 134 && analogRead(A0) < 154){//si la ligne noir est capté par GAUCHE ET CENTRE --> changer valeurs
+      demarrer(-0.15,0);
+    	delay(250);
+	  //tDroiteRecule(1);
+      //arret();
+      vitesseConstante(12, 0.2, 0.2);
+      arret();
+	    demarrer(0,-0.15);
+    	delay(200);
+    }
+      
+    while (analogRead(A0) > 574 && analogRead(A0) < 594){//si la ligne noir est capté par DROIT ET CENTRE --> changer valeurs
+      demarrer(0,-0.15);
+    	delay(250);
+	  //tGaucheRecule(1);
+		//arret();
+      vitesseConstante(12, 0.2, 0.2);
+      arret();
+	    demarrer(-0.15,0);
+    	delay(200);
+    }
+  }
+ 
+  tDroite(45);
+  SERVO_SetAngle(0, 22);
+  section = 4;
 }
 
 void section4Loop()
 {
-<<<<<<< HEAD
-	avancer1(30);
-	SERVO_SetAngle(0,112);
-	avancer1(91.92);
-	changementVoie(100.92, 60.96);
-=======
 	// avancer1(30);
 	// SERVO_SetAngle(0,112);
 	// avancer1(91.92);
@@ -539,7 +635,6 @@ void section4Loop()
 
   section = 5;
   
->>>>>>> 66efdbb64615beb56344b049e6be38127254ca12
 }
 
 void section5loop()
@@ -580,7 +675,7 @@ void loop() {
   if(isStart)
   {
 	//couleur = LectureCouleur();
-	section = 3;
+	section = 2;
 	couleur = 2;
 
 
