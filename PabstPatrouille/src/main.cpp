@@ -95,10 +95,25 @@ void tDroite(int angle)				//angle en degré
 	int valeurEncoder = (2 * PI * DISTANCE_ENTRE_ROUE * angle / 360) * 3200 / CIRCONFERENCE_ROUE;
 
 	while (ENCODER_Read(LEFT) < valeurEncoder)				
-	{	
-		Serial.println("tourner");				
+	{					
 			MOTOR_SetSpeed(LEFT, vitesseRoueGauche);			//Changement de vitesse
 			MOTOR_SetSpeed(RIGHT, 0);							//Changement de vitesse
+
+	}
+}
+
+void tDroiteRecule(int angle)				//angle en degré
+{
+	ENCODER_Reset(LEFT);							//Reset encoder
+  	ENCODER_Reset(RIGHT);							//Reset encoder
+	float vitesseRoueDroite = -0.15;
+
+	int valeurEncoder = (-2 * PI * DISTANCE_ENTRE_ROUE * angle / 360) * 3200 / CIRCONFERENCE_ROUE;
+
+	while (ENCODER_Read(RIGHT) > valeurEncoder)				
+	{					
+			MOTOR_SetSpeed(LEFT, 0);			//Changement de vitesse
+			MOTOR_SetSpeed(RIGHT, vitesseRoueDroite);							//Changement de vitesse
 
 	}
 }
@@ -108,8 +123,8 @@ void avancer1(float distance) //distance à parcourir en cm
 	Serial.println("avancer1");
 	int idelay = 100;
 	float vitesseMax = 0.6;
-  	float vitesseG = 0.25;
-	float vitesseD = 0.25;
+  	float vitesseG = 0.2;
+	float vitesseD = 0.2;
 	float ponderation = 0.0001;
 	float distanceEncoder = (distance / CIRCONFERENCE_ROUE) * 3200;
 
@@ -235,9 +250,9 @@ int LectureCouleur()
 	tcs.getRawData(&r, &g, &b, &c);
 	tcs.getRawData(&r, &g, &b, &c);
 
-	Serial.println(r);
+	/*Serial.println(r);
 	Serial.println(g);
-	Serial.println(b);
+	Serial.println(b);*/
 
 	if ((15 < r && r < 24) && (17 < g  && g < 26) && (13 < b && b < 19))
 	{
@@ -352,7 +367,7 @@ void section1Loop(){
 
 	Serial.println("bonjour voici la section 1");
 
-	SERVO_SetAngle(1,49);
+	SERVO_SetAngle(1,131);
 	SERVO_SetAngle(0,112);
 	delay(100);
 
@@ -388,9 +403,6 @@ void section2()
 
 	while( c != 0)
 	{
-		ENCODER_Reset(LEFT);
-		ENCODER_Reset(RIGHT);
-
 		c = LectureCouleur();
 		Serial.println("couleur = ");
 		Serial.println(c);
@@ -399,15 +411,6 @@ void section2()
 		float vDroit = c == 3 ? 0.22 : 0.2; 
 
 		demarrer(vGauche,vDroit);
-
-		/*if (c = 2)
-		{
-			demarrer(0.21, 0.20);
-		}
-		else
-		{
-			demarrer(0.20, 0.21);
-		}*/
 
 		if(!verreTrouve)
 		{
@@ -432,7 +435,7 @@ void section2()
 		}
 	}
 	arret();
-	SERVO_SetAngle(1,49);
+	SERVO_SetAngle(1,131);
 	
 	section = 3;
 }
@@ -443,43 +446,59 @@ void section3Loop(){
 	//730 		: milieu noir
 	//144 - 436	: gauche noir
 	//584 - 876 : droite noir
-	float vitesseGauche = 0.5;
-	float vitesseDroite = 0.5;
+	float vitesseGauche = 0.2;
+	float vitesseDroite = 0.2;
 
 	Serial.println("Section 3");
-	SERVO_SetAngle(1,49);
+	SERVO_SetAngle(1,131);
 	SERVO_SetAngle(0, 25);
 	arret();
 
-	if(couleur == 2)
-		setMoteurSection1();
+	/*if(couleur == 2)
+	{
+
+		avancer1(60);
+		tDroite(90);
+		avancer1(70);
+		SERVO_SetAngle(0, 25);
+	}
 		
 	if(couleur == 3)
 	{
-		avancer1(30.48);
-		tDroite(45);
-	}
+		avancer1(60);
+		tDroite(90);
+		avancer1(30);
+	}*/
 	while (LectureCouleur() != 2)
 	{
 		Serial.println(analogRead(A0));
-		MOTOR_SetSpeed(LEFT, vitesseGauche);
-		MOTOR_SetSpeed(RIGHT, vitesseDroite);
+		//MOTOR_SetSpeed(LEFT, vitesseGauche);
+		//MOTOR_SetSpeed(RIGHT, vitesseDroite);
 
-		if(analogRead(A0) <= 450)	
+		if(analogRead(A0) > 400 && analogRead(A0) < 500)	
 		{
-			vitesseGauche = 0.15;
-			vitesseDroite = 0.1;
+			Serial.println("trop a droite");
+			//vitesseGauche = 0.1;
+			//vitesseDroite = 0.15;
 		}
 		else if(analogRead(A0) > 700 && analogRead(A0) < 750)
 		{
-			vitesseGauche = 0.1;
-			vitesseDroite = 0.1;
+			Serial.println("yessssssss");
+			//vitesseGauche = 0.1;
+			//vitesseDroite = 0.1;
 		}
-		else if(analogRead(A0) > 500)
+		else if(analogRead(A0) > 600 && analogRead(A0) < 900)
 		{
-			vitesseGauche = 0.1;
-			vitesseDroite = 0.15;
+			Serial.println("trop a gauche");
+			//vitesseGauche = 0.15;
+			//vitesseDroite = 0.1;
 		}
+		/*else if(analogRead(A0) > 500 && analogRead(A0) < 590)
+		{
+			Serial.println("45 en reculant");
+			tDroiteRecule(45);
+		}*/
+		
 	}
 
 	tDroite(45);
@@ -492,7 +511,7 @@ void section4Loop()
 	avancer1(30);
 	SERVO_SetAngle(0,112);
 	avancer1(91.92);
-	changementVoie(121.92, 60.96);
+	changementVoie(100.92, 60.96);
 }
 void section5loop()
 {
@@ -501,9 +520,9 @@ void section5loop()
 		MOTOR_SetSpeed(LEFT, 0.41);
 		MOTOR_SetSpeed(RIGHT, 0.4);	
 		
-		if(ROBUS_ReadIR(3) < 200)
+		if(ROBUS_ReadIR(IRDroit) < 300)
 		{
-			while(ROBUS_ReadIR(3) < 200)
+			while(ROBUS_ReadIR(IRDroit) < 300)
 			{
 				MOTOR_SetSpeed(RIGHT, 0.2);
 			}
@@ -531,7 +550,9 @@ void loop() {
 
   if(isStart)
   {
-	couleur = LectureCouleur();
+	//couleur = LectureCouleur();
+	section = 3;
+	couleur = 2;
 
 
 	switch (section)
@@ -543,7 +564,6 @@ void loop() {
       		//break;
     	case 2://Ligne droite
 			section2();
-			Serial.println(section);
 			Serial.println("case = 2");
     	  	//break;
     	case 3://deuxième tournant
