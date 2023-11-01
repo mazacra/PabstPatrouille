@@ -177,7 +177,7 @@ void setMoteurSection1()
 			while (ENCODER_Read(LEFT) < 17750){
 				MOTOR_SetSpeed(LEFT, vitesseRoueGauche);
 				//MOTOR_SetSpeed(RIGHT, vitesseRoueDroite(60.96 + 5.89, 91.44 - 5.89, vitesseRoueGauche));
-				MOTOR_SetSpeed(RIGHT, 0.80 * vitesseRoueGauche);
+				MOTOR_SetSpeed(RIGHT, 0.79 * vitesseRoueGauche);
 			}
 			Serial.println("fin");
 			break;
@@ -252,11 +252,11 @@ int LectureCouleur()
 		couleurLue = 4; // bleu
 		return couleurLue;
 	}
-	else if ((8 < r && r > 15) && ( 8 < g && g > 17) && (7 < b && b > 14)) // aproximatif
+	/*else if ((8 < r && r > 15) && ( 8 < g && g > 17) && (7 < b && b > 14)) // aproximatif
 	{
 		couleurLue = 5; //noir
 		return couleurLue;
-	}
+	}*/
 
 }
 
@@ -443,9 +443,11 @@ void section2()
 }*/
 //Tournant blanc
 void section3Loop(){
+	Serial.println("Section 3");
 	SERVO_SetAngle(1,49);
 	SERVO_SetAngle(0, 25);
 	arret();
+
 	if(couleur == 2)
 		setMoteurSection1();
 		
@@ -454,22 +456,24 @@ void section3Loop(){
 		avancer1(30.48);
 		tDroite(45);
 	}
-	while (LectureCouleur() == 0)
+	while (LectureCouleur() != 2)
 	{
+		Serial.println(analogRead(A0));
+
 		if(analogRead(A0) <= 450)	
 		{
-			MOTOR_SetSpeed(LEFT, 0.25);
-			MOTOR_SetSpeed(RIGHT, 0.28);
+			MOTOR_SetSpeed(LEFT, 0.5);
+			MOTOR_SetSpeed(RIGHT, 0.20);
 		}
 		else if(analogRead(A0) > 700 && analogRead(A0) < 750)
 		{
-			MOTOR_SetSpeed(LEFT, 0.25);
-			MOTOR_SetSpeed(RIGHT, 0.25);
+			MOTOR_SetSpeed(LEFT, 0.20);
+			MOTOR_SetSpeed(RIGHT, 0.20);
 		}
 		else 
 		{
-			MOTOR_SetSpeed(LEFT, 0.28);
-			MOTOR_SetSpeed(RIGHT, 0.25);
+			MOTOR_SetSpeed(LEFT, 0.20);
+			MOTOR_SetSpeed(RIGHT, 0.5);
 		}
 	}
 	arret();
@@ -480,9 +484,10 @@ void section3Loop(){
 
 void section4Loop()
 {
+	avancer1(30);
 	SERVO_SetAngle(0,112);
-	avancer1(121.92);
-	changementVoie(121.92, 30.48);
+	avancer1(91.92);
+	changementVoie(121.92, 60.96);
 }
 
 void setup(){
@@ -503,7 +508,9 @@ void loop() {
   {
 	couleur = LectureCouleur();
 
-    switch (section)
+	
+
+	switch (section)
     {
     	case 1://Premier tournant
       		section1Loop();
@@ -512,16 +519,18 @@ void loop() {
       		//break;
     	case 2://Ligne droite
 			section2();
+			Serial.println(section);
 			Serial.println("case = 2");
-    	  	break;
-    	/*case 3://deuxième tournant
+    	  	//break;
+    	case 3://deuxième tournant
 			section3Loop();
-      		break;
+			Serial.println("case = 3");
+      		//break;
     	case 4://ligne droite
 			section4Loop();
       		break;
     	default:
       		break;
-    	}*/
+    	}
 	}
 }
