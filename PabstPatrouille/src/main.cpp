@@ -383,9 +383,17 @@ void section1Loop(){
 
 	Serial.println("bonjour voici la section 1");
 
-	SERVO_SetAngle(1,131);
-	SERVO_SetAngle(0,112);
-	delay(100);
+    // demarrer(-0.15, -0.15);
+    // delay(1000);
+    // couleur = LectureCouleur();
+    // demarrer(0.15, 0.15);
+    // delay(1000);
+
+    // arret();
+
+	// SERVO_SetAngle(1,131);
+	// SERVO_SetAngle(0,112);
+	// delay(100);
 
 	//avancer1(16.5);
 	
@@ -393,6 +401,7 @@ void section1Loop(){
 
 	if(couleur == 3)
 	{
+    Serial.println("avance pcq vert");
 		avancer1(50);
 	}
 
@@ -672,7 +681,7 @@ void section3Loop(){
       
     while (analogRead(A0) > 574 && analogRead(A0) < 594){//si la ligne noir est capté par DROIT ET CENTRE --> changer valeurs
     Serial.println("DROIT ET CENTRE");  
-	  /*demarrer(0,-0.15);
+	  demarrer(0,-0.15);
     	delay(250);
 	  //tGaucheRecule(1);
 		//arret();
@@ -684,7 +693,7 @@ void section3Loop(){
     }
 	Serial.println("ON RECOMMeNCE.");
 
-	/*while (analogRead(A0) > 1000){
+	while (analogRead(A0) > 1000){
 	if (ENCODER_Read(LEFT) > 8000){
 		Serial.println("ca fonctionne");
 		demarrer(-0.15,0);
@@ -807,31 +816,61 @@ void loop()
   if(isStart)
   {
 
+    // demarrer(-0.15, -0.15);
+    // delay(1000);
+    // couleur = LectureCouleur();
+    // demarrer(0.15, 0.15);
+    // delay(1000);
 
-		couleur = LectureCouleur();
+		//couleur = LectureCouleur();
 		section = 1;
 		//couleur = 2;
 		switch (section)
 		{
 			case 1://Premier tournant
+        Serial.println("debut case 1");
+        SERVO_SetAngle(1,131);
+	      SERVO_SetAngle(0,112);
+	      delay(100);
+
+        demarrer(-0.15, -0.15);
+        delay(1000);
+        arret();
+        couleur = LectureCouleur();
+        Serial.println(couleur);
+        delay(1000);
+        demarrer(0.15, 0.15);
+        delay(1000);
+
+        arret();
 				section1Loop();
 				section = 2;
-				Serial.println("case = 1");
+        Serial.println("fin case 1");
+				//Serial.println("case = 1");
 				//break;
 			case 2://Ligne droite
+        Serial.println("debut case 2");
 				section2();
-				Serial.println("case = 2");
+        Serial.println("fin case 2");
+				//Serial.println("case = 2");
 				//break;
 			case 3://deuxième tournant
-				section3Loop();
-				Serial.println("case = 3");
+				Serial.println("debut case 3");
+        section3Loop();
+        Serial.println("fin case 3");
+				//Serial.println("case = 3");
 				//break;
 			case 4://ligne droite
-				Serial.println("case = 4");
+        Serial.println("debut case 4");
+				//Serial.println("case = 4");
 				section4Loop();
+        Serial.println("fin case 4");
 				//break;
 			case 5: //suivre mur
+      //Serial.println("debut case 1");
+        Serial.println("debut case 5");
 				section5loop();
+        Serial.println("fin case 5");
 				break;
 
 			default:
