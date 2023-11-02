@@ -208,7 +208,7 @@ void setMoteurSection1()
 
 	ENCODER_Reset(LEFT);
   	ENCODER_Reset(RIGHT);
-	float vitesseRoueGauche = 0.5;
+	float vitesseRoueGauche = 0.4;
 	
 	Serial.println(couleur);
 
@@ -216,7 +216,7 @@ void setMoteurSection1()
 	{
 		case 3://Vert
 			Serial.println("vert");
-			while(ENCODER_Read(LEFT) < 11450){
+			while(ENCODER_Read(LEFT) < 11800){
 				MOTOR_SetSpeed(LEFT, vitesseRoueGauche);
 				MOTOR_SetSpeed(RIGHT, vitesseRoueDroite(30.48 + 5.89, 60.96 - 5.89, vitesseRoueGauche));
 			}
@@ -224,7 +224,7 @@ void setMoteurSection1()
 			break;
 		case 2://Jaune
 			Serial.println("jaune");
-			while (ENCODER_Read(LEFT) < 18200){
+			while (ENCODER_Read(LEFT) < 18300){
 				MOTOR_SetSpeed(LEFT, vitesseRoueGauche);
 				MOTOR_SetSpeed(RIGHT, vitesseRoueDroite(60.96 + 5.89, 91.44 - 5.89, vitesseRoueGauche));
 				//MOTOR_SetSpeed(RIGHT, 0.78 * vitesseRoueGauche);
@@ -392,11 +392,11 @@ void section1Loop(){
 
 	if(couleur == 3)
 	{
-		avancer1(57);
+		avancer1(50);
 	}
 
 	else
-		vitesseConstante(64, 0.27, 0.25);
+		avancer1(64);
 	
 	setMoteurSection1();
 	arret();
@@ -458,7 +458,7 @@ void section3Loop(){
 
 	if(couleur == 2)
 	{
-		avancer1(62);
+		avancer1(63);
 		tDroite(91);
 		SERVO_SetAngle(0, 26);
 		avancer1(121.92);
@@ -467,7 +467,7 @@ void section3Loop(){
 	if(couleur == 3)
 	{
 		avancer1(62);
-		tDroite(97);
+		tDroite(100);
 		SERVO_SetAngle(0, 26);
 		avancer1(100.44);
 	}
@@ -708,8 +708,8 @@ void section3Loop(){
 void section4Loop()
 {
 
-  SERVO_SetAngle(0,22);
-  vitesseConstante(10, 0.27, 0.25);
+  SERVO_SetAngle(0,130);
+ /* vitesseConstante(10, 0.27, 0.25);
 
   SERVO_SetAngle(0,130);
 
@@ -729,13 +729,29 @@ void section4Loop()
 
   arret();
 
+  section = 5;*/
+
+  avancer1(130);
+  tDroite(90);
+  ENCODER_Reset(LEFT);
+  while(ENCODER_Read(LEFT) < 9000)
+	avancer();
+
+  MOTOR_SetSpeed(LEFT, -0.15);
+  MOTOR_SetSpeed(RIGHT, -0.15);
+  delay(1250);
+  tGauche(90);
   section = 5;
   
 }
 
 void section5loop()
 {
-	SERVO_SetAngle(0,130);
+	/*while(ROBUS_ReadIR(IRDroit))
+	{
+		avancer();
+	}*/
+
 	if (ROBUS_ReadIR(IRDroit) > 270)
 	{
 		Serial.println("trop proche");
