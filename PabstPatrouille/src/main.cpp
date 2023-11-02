@@ -14,6 +14,7 @@ int tour = 0;
 Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_2_4MS, TCS34725_GAIN_16X);
 
 void CommencerTerminer(){
+	Serial.println(analogRead(PIN_A4));
     if(ROBUS_IsBumper(3)){					//bumper ou sifflet pour démarrer
         isStart = !isStart;
 	}else if(analogRead(PIN_A4) > 590){
@@ -749,7 +750,6 @@ void section4Loop()
 
 void section5loop()
 {
-	SERVO_SetAngle(0,130);
 	while(true)
 	{
 		if (ROBUS_ReadIR(IRDroit) > 335)
@@ -811,7 +811,6 @@ void loop()
 		couleur = LectureCouleur();
 		section = 1;
 		//couleur = 2;
-		section =2;
 		switch (section)
 		{
 			case 1://Premier tournant
