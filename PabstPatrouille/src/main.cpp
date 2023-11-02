@@ -16,9 +16,9 @@ Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_2_4MS, TCS347
 void CommencerTerminer(){
     if(ROBUS_IsBumper(3)){					//bumper ou sifflet pour démarrer
         isStart = !isStart;
-	}else if(analogRead(PIN_A4) > 600){
+	}else if(analogRead(PIN_A4) > 590){
 		isStart = true;
-	}
+	}      
 
 	section = 1;
 }
@@ -216,7 +216,7 @@ void setMoteurSection1()
 	{
 		case 3://Vert
 			Serial.println("vert");
-			while(ENCODER_Read(LEFT) < 11250){
+			while(ENCODER_Read(LEFT) < 11450){
 				MOTOR_SetSpeed(LEFT, vitesseRoueGauche);
 				MOTOR_SetSpeed(RIGHT, vitesseRoueDroite(30.48 + 5.89, 60.96 - 5.89, vitesseRoueGauche));
 			}
@@ -224,7 +224,7 @@ void setMoteurSection1()
 			break;
 		case 2://Jaune
 			Serial.println("jaune");
-			while (ENCODER_Read(LEFT) < 17750){
+			while (ENCODER_Read(LEFT) < 18200){
 				MOTOR_SetSpeed(LEFT, vitesseRoueGauche);
 				MOTOR_SetSpeed(RIGHT, vitesseRoueDroite(60.96 + 5.89, 91.44 - 5.89, vitesseRoueGauche));
 				//MOTOR_SetSpeed(RIGHT, 0.78 * vitesseRoueGauche);
@@ -386,19 +386,17 @@ void section1Loop(){
 	SERVO_SetAngle(0,112);
 	delay(100);
 
-	avancer1(16.5);
+	//avancer1(16.5);
 	
 	setMoteurSection1();
 
 	if(couleur == 3)
 	{
-		vitesseConstante(59, 0.2, 0.2);
+		avancer1(57);
 	}
 
 	else
-	{
-		vitesseConstante(60, 0.2, 0.2);
-	}
+		vitesseConstante(64, 0.27, 0.25);
 	
 	setMoteurSection1();
 	arret();
@@ -457,6 +455,42 @@ void section2()
 
 //Tournant blanc
 void section3Loop(){
+
+	if(couleur == 2)
+	{
+		avancer1(62);
+		tDroite(91);
+		SERVO_SetAngle(0, 26);
+		avancer1(121.92);
+	}
+		
+	if(couleur == 3)
+	{
+		avancer1(62);
+		tDroite(97);
+		SERVO_SetAngle(0, 26);
+		avancer1(100.44);
+	}
+	tDroite(50);
+	avancer1(86.21);
+	tDroite(45);
+	SERVO_SetAngle(0, 22);
+
+	arret();
+	delay(500);
+
+	demarrer(0.2,0.2);
+
+	int c = LectureCouleur();
+	while(c == 0) //!= 1 || c != 2 || c != 3 || c != 4 || c != 20)
+	{
+		Serial.println(c);
+		//demarrer(0.2,0.2);
+		c = LectureCouleur();
+	}
+
+	section = 4;
+
 	/*//1000+ 	: tous blanc
 	//730 		: milieu noir
 	//144 - 436	: gauche noir
@@ -519,7 +553,7 @@ void section3Loop(){
 	tDroite(45);
 	SERVO_SetAngle(0, 22);
 	section = 4;
-}*/
+}
 
 //LIGNE MILIEU = 730
 //LIGNE GAUCHE = 436
@@ -642,7 +676,7 @@ void section3Loop(){
       vitesseConstante(12, 0.2, 0.2);
       arret();
 	    //demarrer(-0.15,0);
-    	//delay(200);*/
+    	//delay(200);
 		tDroiteRecule(45);
     }
 	Serial.println("ON RECOMMeNCE.");
@@ -661,38 +695,37 @@ void section3Loop(){
 	}
 
 	else
-	avancer();*/
+	avancer();
 
   }
   
  
   tDroite(45);
   SERVO_SetAngle(0, 22);
-  section = 4;
+  section = 4;*/
 }
 
 void section4Loop()
 {
-	// avancer1(30);
-	// SERVO_SetAngle(0,112);
-	// avancer1(91.92);
-	// changementVoie(121.92, 60.96);
+
+  SERVO_SetAngle(0,22);
+  vitesseConstante(10, 0.27, 0.25);
+
+  SERVO_SetAngle(0,130);
+
+  vitesseConstante(110, 0.27, 0.25);
 
   arret();
 
-  SERVO_SetAngle(0,112);
+  tDroite(30);
 
-  vitesseConstante(120, 0.2, 0.2);
-
-  arret();
-
-  tDroite(45);
-
-  avancer();
 
   while (ROBUS_ReadIR(IRDroit) < 300){
     //boucle infini pour qu'il continu d'avancer tant qu'il est pas pret du mur
+	demarrer(0.2,0.2);
   }
+
+  tGauche(55);
 
   arret();
 
@@ -702,19 +735,45 @@ void section4Loop()
 
 void section5loop()
 {
-	while(true)
+	SERVO_SetAngle(0,130);
+	if (ROBUS_ReadIR(IRDroit) > 270)
 	{
-		MOTOR_SetSpeed(LEFT, 0.41);
-		MOTOR_SetSpeed(RIGHT, 0.4);	
+		Serial.println("trop proche");
+		MOTOR_SetSpeed(LEFT, 0.25);
+		MOTOR_SetSpeed(RIGHT, 0.28);	
+	}
+	else if (ROBUS_ReadIR(IRDroit) < 265 && ROBUS_ReadIR(IRDroit) > 240)
+	{
+		Serial.println("trop loin");
+		MOTOR_SetSpeed(LEFT, 0.28);
+		MOTOR_SetSpeed(RIGHT, 0.25);
+	}
+	else if (ROBUS_ReadIR(IRDroit) < 240)
+	{
+		Serial.println("plus de mur");
+		while(ROBUS_ReadIR(IRDroit) < 240)
+		{
+		MOTOR_SetSpeed(LEFT, 0.25);
+		MOTOR_SetSpeed(RIGHT, 0.0);
+		}
+	}
+	
+	
+	
+	
+	/*while(true)
+	{
+		MOTOR_SetSpeed(LEFT, 0.31);
+		MOTOR_SetSpeed(RIGHT, 0.30);	
 		
-		if(ROBUS_ReadIR(IRDroit) < 300)
+		if(ROBUS_ReadIR(IRDroit) < 275)
 		{
 			while(ROBUS_ReadIR(IRDroit) < 300)
 			{
 				MOTOR_SetSpeed(RIGHT, 0.1);
 			}
 		}
-	}
+	}*/
 
 	
 }
@@ -734,12 +793,16 @@ void setup(){
 
 void loop() {
   CommencerTerminer(); 
-
+  /*SERVO_SetAngle(0,112);
+	Serial.println(ROBUS_ReadIR(IRDroit));
+	delay(500);*/
   if(isStart)
   {
-	//couleur = LectureCouleur();
-	section = 3;
-	couleur = 2;
+
+
+	couleur = LectureCouleur();
+	//section = 1;
+	//couleur = 2;
 
 
 	switch (section)
@@ -758,8 +821,9 @@ void loop() {
 			Serial.println("case = 3");
       		//break;
     	case 4://ligne droite
+			Serial.println("case = 4");
 			section4Loop();
-      		break;
+      		//break;
 		case 5: //suivre mur
 			section5loop();
 			break;
