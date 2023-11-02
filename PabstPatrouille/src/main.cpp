@@ -533,25 +533,25 @@ void section5loop()
 		{
 			Serial.println("trop proche");
 			Serial.println(ROBUS_ReadIR(IRDroit));
-			MOTOR_SetSpeed(LEFT, 0.5);
-			MOTOR_SetSpeed(RIGHT, 0.75);	
+			MOTOR_SetSpeed(LEFT, 0.4);
+			MOTOR_SetSpeed(RIGHT, 0.6);	
 		}
 		else if (ROBUS_ReadIR(IRDroit) < 325 && ROBUS_ReadIR(IRDroit) > 240)
 		{
 			Serial.println("trop loin");
 			Serial.println(ROBUS_ReadIR(IRDroit));
-			MOTOR_SetSpeed(LEFT, 0.75);
-			MOTOR_SetSpeed(RIGHT, 0.5);
+			MOTOR_SetSpeed(LEFT, 0.6);
+			MOTOR_SetSpeed(RIGHT, 0.4);
 		}
 		else if (ROBUS_ReadIR(IRDroit) < 240)
 		{
 			Serial.println("plus de mur");
 			Serial.println(ROBUS_ReadIR(IRDroit));
-			demarrer(0.4, 0.4);
+			demarrer(0.2, 0.2);
 			delay(650);
 			while(ROBUS_ReadIR(IRDroit) < 240)
 			{
-				MOTOR_SetSpeed(LEFT, 0.45);
+				MOTOR_SetSpeed(LEFT, 0.3);
 				MOTOR_SetSpeed(RIGHT, 0.0);
 			}
 		}
@@ -599,7 +599,7 @@ void loop()
 
 	section = 5;
 
-		/*switch (section)
+		switch (section)
 		{
 			// case 1://Premier tournant
 			// Serial.println("debut case 1");
@@ -645,7 +645,7 @@ void loop()
 			default:
 				break;
 		}
-	}*/
+	}
 }
-}
+
 
