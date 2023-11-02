@@ -458,18 +458,20 @@ void section3Loop(){
 
 	if(couleur == 2)
 	{
-		avancer1(63);
+		avancer1(66);
 		tDroite(91);
-		SERVO_SetAngle(0, 26);
-		avancer1(121.92);
+		SERVO_SetAngle(0, 27);
+		//avancer1(121.92);
+		vitesseConstante(121.92, 0.3, 0.3);
 	}
 		
 	if(couleur == 3)
 	{
-		avancer1(62);
+		avancer1(63);
 		tDroite(100);
-		SERVO_SetAngle(0, 26);
-		avancer1(100.44);
+		SERVO_SetAngle(0, 27);
+		//avancer1(103.44);
+		vitesseConstante(103.44, 0.3, 0.3);
 	}
 	tDroite(50);
 	avancer1(86.21);
@@ -707,7 +709,7 @@ void section3Loop(){
 
 void section4Loop()
 {
-
+  vitesseConstante(10, 0.2, 0.2);
   SERVO_SetAngle(0,130);
  /* vitesseConstante(10, 0.27, 0.25);
 
@@ -734,68 +736,57 @@ void section4Loop()
   avancer1(130);
   tDroite(90);
   ENCODER_Reset(LEFT);
-  while(ENCODER_Read(LEFT) < 9000)
+  while(ENCODER_Read(LEFT) < 11000)
 	avancer();
 
   MOTOR_SetSpeed(LEFT, -0.15);
   MOTOR_SetSpeed(RIGHT, -0.15);
   delay(1250);
-  tGauche(90);
+  tGauche(85);
   section = 5;
   
 }
 
 void section5loop()
 {
-	/*while(ROBUS_ReadIR(IRDroit))
+	SERVO_SetAngle(0,130);
+	while(true)
 	{
-		avancer();
-	}*/
-
-	if (ROBUS_ReadIR(IRDroit) > 270)
-	{
-		Serial.println("trop proche");
-		MOTOR_SetSpeed(LEFT, 0.25);
-		MOTOR_SetSpeed(RIGHT, 0.28);	
-	}
-	else if (ROBUS_ReadIR(IRDroit) < 265 && ROBUS_ReadIR(IRDroit) > 240)
-	{
-		Serial.println("trop loin");
-		MOTOR_SetSpeed(LEFT, 0.28);
-		MOTOR_SetSpeed(RIGHT, 0.25);
-	}
-	else if (ROBUS_ReadIR(IRDroit) < 240)
-	{
-		Serial.println("plus de mur");
-		while(ROBUS_ReadIR(IRDroit) < 240)
+		if (ROBUS_ReadIR(IRDroit) > 335)
 		{
-		MOTOR_SetSpeed(LEFT, 0.25);
-		MOTOR_SetSpeed(RIGHT, 0.0);
+			Serial.println("trop proche");
+			Serial.println(ROBUS_ReadIR(IRDroit));
+			MOTOR_SetSpeed(LEFT, 0.20);
+			MOTOR_SetSpeed(RIGHT, 0.40);	
 		}
-	}
-	
-	
-	
-	
-	/*while(true)
-	{
-		MOTOR_SetSpeed(LEFT, 0.31);
-		MOTOR_SetSpeed(RIGHT, 0.30);	
-		
-		if(ROBUS_ReadIR(IRDroit) < 275)
+		else if (ROBUS_ReadIR(IRDroit) < 325 && ROBUS_ReadIR(IRDroit) > 240)
 		{
-			while(ROBUS_ReadIR(IRDroit) < 300)
+			Serial.println("trop loin");
+			Serial.println(ROBUS_ReadIR(IRDroit));
+			MOTOR_SetSpeed(LEFT, 0.40);
+			MOTOR_SetSpeed(RIGHT, 0.20);
+		}
+		else if (ROBUS_ReadIR(IRDroit) < 240)
+		{
+			Serial.println("plus de mur");
+			Serial.println(ROBUS_ReadIR(IRDroit));
+			demarrer(0.2, 0.2);
+			delay(650);
+			while(ROBUS_ReadIR(IRDroit) < 240)
 			{
-				MOTOR_SetSpeed(RIGHT, 0.1);
+				MOTOR_SetSpeed(LEFT, 0.25);
+				MOTOR_SetSpeed(RIGHT, 0.0);
 			}
 		}
-	}*/
 
+	
+	}
 	
 }
 
 
-void setup(){
+void setup()
+{
 	BoardInit();
 	Serial.begin(9600);
 
@@ -807,7 +798,8 @@ void setup(){
   	pinMode(PIN_A5, INPUT);
 }
 
-void loop() {
+void loop() 
+{
   CommencerTerminer(); 
   /*SERVO_SetAngle(0,112);
 	Serial.println(ROBUS_ReadIR(IRDroit));
@@ -816,36 +808,36 @@ void loop() {
   {
 
 
-	couleur = LectureCouleur();
-	//section = 1;
-	//couleur = 2;
+		couleur = LectureCouleur();
+		section = 1;
+		//couleur = 2;
+		section =2;
+		switch (section)
+		{
+			case 1://Premier tournant
+				section1Loop();
+				section = 2;
+				Serial.println("case = 1");
+				//break;
+			case 2://Ligne droite
+				section2();
+				Serial.println("case = 2");
+				//break;
+			case 3://deuxième tournant
+				section3Loop();
+				Serial.println("case = 3");
+				//break;
+			case 4://ligne droite
+				Serial.println("case = 4");
+				section4Loop();
+				//break;
+			case 5: //suivre mur
+				section5loop();
+				break;
 
-
-	switch (section)
-    {
-    	case 1://Premier tournant
-      		section1Loop();
-			section = 2;
-			Serial.println("case = 1");
-      		//break;
-    	case 2://Ligne droite
-			section2();
-			Serial.println("case = 2");
-    	  	//break;
-    	case 3://deuxième tournant
-			section3Loop();
-			Serial.println("case = 3");
-      		//break;
-    	case 4://ligne droite
-			Serial.println("case = 4");
-			section4Loop();
-      		//break;
-		case 5: //suivre mur
-			section5loop();
-			break;
-
-    	default:
-      		break;
-    	}
+			default:
+				break;
+		}
 	}
 }
+
