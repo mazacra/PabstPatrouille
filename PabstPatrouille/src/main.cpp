@@ -534,57 +534,65 @@ void section3Loop(){
 	ENCODER_Reset(LEFT);							//Reset encoder
   	ENCODER_Reset(RIGHT);							
  
-  if(couleur == 2)
-	{
+   if(couleur == 2)
+ 	{
 
-		avancer1(58);
-		tDroite(90);
-		avancer1(80);
-		SERVO_SetAngle(0, 25);
-	}
+ 		avancer1(56);
+ 		tDroite(90);
+ 		avancer1(80);
+ 		SERVO_SetAngle(0, 25);
+ 	}
 		
-	if(couleur == 3)
-	{
-		avancer1(60);
-		tDroite(90);
-		avancer1(35);
-		SERVO_SetAngle(0, 25);
-	}
+ 	if(couleur == 3)
+ 	{
+ 		avancer1(60);
+ 		tDroite(90);
+ 		avancer1(35);
+ 		SERVO_SetAngle(0, 25);
+ 	}
  
   while (LectureCouleur() != 2){ //tant qu'il est encore dans la section 3
-	avancer();
+  Serial.println(analogRead(A0));
+	//avancer();
  
     while (analogRead(A0) > 720 && analogRead(A0) < 740){//si la ligne noir est capté par CENTRE
-    	avancer();
+    	//avancer();
     }
  
     while (analogRead(A0) > 426 && analogRead(A0) < 446){//si la ligne noir est capté par GAUCHE --> changer valeurs
-    	demarrer(-0.15,0);
+    	while (analogRead(A0) < 720 && analogRead(A0) > 740){
+			Serial.println("Trop a droite");
+			demarrer(-0.15,0);
     	delay(250);
     	vitesseConstante(12, 0.2, 0.2);
     	arret();
 		demarrer(0,-0.15);
     	delay(200);
+		}
     	
     }
  
     while (analogRead(A0) > 866 && analogRead(A0) < 886){//si la ligne noir est capté par DROITE --> changer valeurs
-    	demarrer(0,-0.15);
+    	while (analogRead(A0) < 720 && analogRead(A0) > 740){
+			Serial.println("Trop a gauche");
+		demarrer(0,-0.15);
     	delay(250);
-		//tGaucheRecule(1);
-		//arret();
+		tGaucheRecule(1);
+		arret();
     	vitesseConstante(12, 0.2, 0.2);
     	arret();
-		   	demarrer(-0.15,0);
+		  	demarrer(-0.15,0);
     	delay(200);
+		}
 		
     }
  
       while (analogRead(A0) > 134 && analogRead(A0) < 154){//si la ligne noir est capté par GAUCHE ET CENTRE --> changer valeurs
-      demarrer(-0.15,0);
+      Serial.println("GAUCHE ET CENTRE");
+	  demarrer(-0.15,0);
     	delay(250);
-	  //tDroiteRecule(1);
-      //arret();
+	  tDroiteRecule(1);
+      arret();
       vitesseConstante(12, 0.2, 0.2);
       arret();
 	    demarrer(0,-0.15);
@@ -592,7 +600,10 @@ void section3Loop(){
     }
       
     while (analogRead(A0) > 574 && analogRead(A0) < 594){//si la ligne noir est capté par DROIT ET CENTRE --> changer valeurs
-      demarrer(0,-0.15);
+    Serial.println("DROIT ET CENTRE");  
+	  tDroiteRecule(45);
+	  
+	  demarrer(0,-0.15);
     	delay(250);
 	  //tGaucheRecule(1);
 		//arret();
@@ -601,6 +612,7 @@ void section3Loop(){
 	    demarrer(-0.15,0);
     	delay(200);
     }
+	Serial.println("ON RECOMMANCE.");
   }
  
   tDroite(45);
@@ -675,7 +687,7 @@ void loop() {
   if(isStart)
   {
 	//couleur = LectureCouleur();
-	section = 2;
+	section = 3;
 	couleur = 2;
 
 
