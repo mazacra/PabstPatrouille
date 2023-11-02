@@ -51,7 +51,7 @@ void demarrer(float vitesseG, float vitesseD){
 //Potentiellement à modifier pour qu'il avance toujours (on a pas de raison de s'arrêter pour l'instant)
 //Donc pourrait ce simplifier à allumer les moteurs, et on appelera notre PID ailleurs
 void avancer(){
-  	int idelay = 300;
+  	int idelay = 100;
   	float vitesse0 = 0.20;
 	float vitesse1 = 0.20;
 	float ponderation = 0.0001;
@@ -534,86 +534,137 @@ void section3Loop(){
 	ENCODER_Reset(LEFT);							//Reset encoder
   	ENCODER_Reset(RIGHT);							
  
-   if(couleur == 2)
- 	{
+  if(couleur == 2)
+	{
 
- 		avancer1(56);
- 		tDroite(90);
- 		avancer1(80);
- 		SERVO_SetAngle(0, 25);
- 	}
+		// avancer1(56);
+		// tDroite(90);
+		// avancer1(80);
+		SERVO_SetAngle(0, 25);
+
+	}
 		
- 	if(couleur == 3)
- 	{
- 		avancer1(60);
- 		tDroite(90);
- 		avancer1(35);
- 		SERVO_SetAngle(0, 25);
- 	}
+	if(couleur == 3)
+	{
+		avancer1(60);
+		tDroite(90);
+		avancer1(35);
+		SERVO_SetAngle(0, 25);
+	}
  
+	ENCODER_Reset(LEFT);
+	ENCODER_Reset(RIGHT);
+
   while (LectureCouleur() != 2){ //tant qu'il est encore dans la section 3
-  Serial.println(analogRead(A0));
+
 	//avancer();
+	if (ENCODER_Read(LEFT) > 8000){
+		Serial.println("ca fonctionne");
+		demarrer(-0.15,0);
+    	delay(500);
+
+		demarrer(-0.15,-0.15);
+    	delay(250);
+
+		ENCODER_Reset(LEFT);
+		ENCODER_Reset(RIGHT);
+	}
+	else
+		avancer();
+
+	Serial.println(ENCODER_Read(LEFT));
  
     while (analogRead(A0) > 720 && analogRead(A0) < 740){//si la ligne noir est capté par CENTRE
-    	//avancer();
+    	Serial.println("centre");
+		avancer();
     }
  
     while (analogRead(A0) > 426 && analogRead(A0) < 446){//si la ligne noir est capté par GAUCHE --> changer valeurs
-    	while (analogRead(A0) < 720 && analogRead(A0) > 740){
-			Serial.println("Trop a droite");
-			demarrer(-0.15,0);
-    	delay(250);
-    	vitesseConstante(12, 0.2, 0.2);
-    	arret();
-		demarrer(0,-0.15);
-    	delay(200);
-		}
     	
+			Serial.println("gauche");
+			demarrer(-0.20,0);
+    	delay(250);
+
+		// 		demarrer(-0.15,-0.15);
+    	// delay(250);
+		while (analogRead(A0) != 730){
+    	avancer();
+    	//arret();
+		//demarrer(-0.15, 0);
+    	//delay(200);
+		}
+    	demarrer(0,-0.15);
+    	delay(250);
+
     }
  
     while (analogRead(A0) > 866 && analogRead(A0) < 886){//si la ligne noir est capté par DROITE --> changer valeurs
-    	while (analogRead(A0) < 720 && analogRead(A0) > 740){
-			Serial.println("Trop a gauche");
-		demarrer(0,-0.15);
-    	delay(250);
-		tGaucheRecule(1);
-		arret();
-    	vitesseConstante(12, 0.2, 0.2);
-    	arret();
-		  	demarrer(-0.15,0);
-    	delay(200);
+    	
+			Serial.println("droit");
+		demarrer(0,-0.20);
+    	delay(300);
+
+		// demarrer(-0.15,-0.15);
+    	// delay(250);
+		//tGaucheRecule(1);
+		//arret();
+		while (analogRead(A0) != 730){
+    	avancer();
+    	//arret();
+		   	//demarrer(-0.15,0);
+    	//delay(200);
 		}
-		
+				demarrer(-0.15,0);
+    	delay(250);
     }
  
       while (analogRead(A0) > 134 && analogRead(A0) < 154){//si la ligne noir est capté par GAUCHE ET CENTRE --> changer valeurs
       Serial.println("GAUCHE ET CENTRE");
-	  demarrer(-0.15,0);
+	  	demarrer(-0.15,0);
     	delay(250);
-	  tDroiteRecule(1);
-      arret();
+
+		// demarrer(-0.15,-0.15);
+    	// delay(250);
+	  //tDroiteRecule(1);
+      //arret();
       vitesseConstante(12, 0.2, 0.2);
       arret();
-	    demarrer(0,-0.15);
-    	delay(200);
+	    //demarrer(0,-0.15);
+    	//delay(200);
     }
       
     while (analogRead(A0) > 574 && analogRead(A0) < 594){//si la ligne noir est capté par DROIT ET CENTRE --> changer valeurs
     Serial.println("DROIT ET CENTRE");  
-	  tDroiteRecule(45);
-	  
-	  demarrer(0,-0.15);
+	  /*demarrer(0,-0.15);
     	delay(250);
 	  //tGaucheRecule(1);
 		//arret();
       vitesseConstante(12, 0.2, 0.2);
       arret();
-	    demarrer(-0.15,0);
-    	delay(200);
+	    //demarrer(-0.15,0);
+    	//delay(200);*/
+		tDroiteRecule(45);
     }
-	Serial.println("ON RECOMMANCE.");
+	Serial.println("ON RECOMMeNCE.");
+
+	/*while (analogRead(A0) > 1000){
+	if (ENCODER_Read(LEFT) > 8000){
+		Serial.println("ca fonctionne");
+		demarrer(-0.15,0);
+    	delay(500);
+
+		demarrer(-0.15,-0.15);
+    	delay(250);
+
+		ENCODER_Reset(LEFT);
+		ENCODER_Reset(RIGHT);
+	}
+
+	else
+	avancer();*/
+
   }
+  
  
   tDroite(45);
   SERVO_SetAngle(0, 22);
