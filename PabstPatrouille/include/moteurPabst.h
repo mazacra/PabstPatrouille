@@ -1,3 +1,4 @@
+#include <LibRobus.h>
 namespace Moteur
 {
     #define DISTANCE_ENTRE_ROUE 18.7
@@ -8,10 +9,14 @@ namespace Moteur
         public:
             //signatures des méthode pour les moteur de déplacement
             float diffClic();
+            void arret();
             void demarrer(float vitesseG, float vitesseD);
             void vitesseConstante(float distance, float vitesseG, float vitesseD);
             void tGauche(int angle);
             void tDroite(int angle);
+            void rotationGauche(float vitesse);
+            void rotationDroite(float vitesse);
+
         private:
     };
 
@@ -20,6 +25,13 @@ namespace Moteur
 	    int clic1 = ENCODER_Read(RIGHT);
 
 	    return (clic0 - clic1)/2;
+    }
+
+    void arret(){
+        MOTOR_SetSpeed(LEFT, 0);
+        MOTOR_SetSpeed(RIGHT, 0);
+        ENCODER_Reset(LEFT);
+        ENCODER_Reset(RIGHT);
     }
 
     void demarrer(float vitesseG, float vitesseD){
@@ -79,5 +91,25 @@ namespace Moteur
 		    vitesseG = (vitesseG - diffClic()*ponderation);
 		    vitesseD = (vitesseD + diffClic()*ponderation);
 	    }
+    }
+
+    void rotationGauche(float vitesse)
+    {
+        //Reset encoder
+        ENCODER_Reset(LEFT);
+        ENCODER_Reset(RIGHT);
+
+        MOTOR_SetSpeed(LEFT, vitesse);
+	    MOTOR_SetSpeed(RIGHT, -(vitesse));
+    }
+
+    void rotationDroite(float vitesse)
+    {
+        //Reset encoder
+        ENCODER_Reset(LEFT);
+        ENCODER_Reset(RIGHT);
+
+        MOTOR_SetSpeed(LEFT, -(vitesse));
+	    MOTOR_SetSpeed(RIGHT, vitesse);
     }
 }
