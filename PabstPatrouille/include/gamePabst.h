@@ -8,4 +8,9 @@ namespace Game
         private:
             int placeholder;
     };
+    
+    void GamePabst::doSmtg()
+    {
+
+    }
 }

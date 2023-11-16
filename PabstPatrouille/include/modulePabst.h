@@ -8,4 +8,9 @@ namespace Module
         private:
             int placeholder;
     };
+    
+    void ModulePabst::doSmtg()
+    {
+
+    }
 }

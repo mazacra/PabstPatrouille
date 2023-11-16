@@ -8,4 +8,9 @@ namespace Moteur
         private:
             int placeholder;
     };
+    
+    void MoteurPabst::doSmtg()
+    {
+
+    }
 }
