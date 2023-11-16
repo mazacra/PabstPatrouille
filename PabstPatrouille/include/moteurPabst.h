@@ -8,6 +8,7 @@ namespace Moteur
         public:
             //signatures des méthode pour les moteur de déplacement
             float diffClic();
+            void demarrer(float vitesseG, float vitesseD);
             void vitesseConstante(float distance, float vitesseG, float vitesseD);
             void tGauche(int angle);
             void tDroite(int angle);
@@ -19,6 +20,14 @@ namespace Moteur
 	    int clic1 = ENCODER_Read(RIGHT);
 
 	    return (clic0 - clic1)/2;
+    }
+
+    void demarrer(float vitesseG, float vitesseD){
+	    ENCODER_Reset(LEFT);	//Reset encoder
+	    ENCODER_Reset(RIGHT);	//Reset encoder
+
+	    MOTOR_SetSpeed(LEFT, vitesseG);		//Changement de vitesse
+	    MOTOR_SetSpeed(RIGHT, vitesseD);	//Changement de vitesse
     }
 
     void tGauche(int angle)				//angle en degré

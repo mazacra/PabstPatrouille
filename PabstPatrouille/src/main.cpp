@@ -10,6 +10,7 @@ using namespace Module;
 //Global var
 ModulePabst module;
 GamePabst game;
+int diff = 0;
 
 void setup() {
 	BoardInit(); //Init libraire LibRobus
@@ -18,5 +19,8 @@ void setup() {
 }
 
 void loop() {
-  
+	if(true)//if bouton pressed
+	{	
+		game.startGame(diff);
+	}
 }
