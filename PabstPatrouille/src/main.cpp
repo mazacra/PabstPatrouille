@@ -11,16 +11,22 @@ using namespace Module;
 ModulePabst module;
 GamePabst game;
 int diff = 0;
+int cpt;
 
-void setup() {
+void setup() 
+{
 	BoardInit(); //Init libraire LibRobus
     
 	Serial.begin(9600);
 }
 
-void loop() {
+void loop() 
+{
+	//LCD AFFICHAGE MENU
+
 	if(true)//if bouton pressed
 	{	
-		game.startGame(diff);
+		cpt = game.startGame(diff);
+		game.endGame(cpt);
 	}
 }

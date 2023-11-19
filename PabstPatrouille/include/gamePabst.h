@@ -15,8 +15,8 @@ namespace Game
             //signatures des méthode pour les moteur de déplacement
             int startGame(int diff);
             int currentGame();
-            int endGame();
-            void nettoyage();
+            void endGame(int cpt);
+            void nettoyage(int cpt);
             void retourHome(int angle);
         private:
             
@@ -59,7 +59,12 @@ namespace Game
         return pointCounter;
     }
 
-    void GamePabst::nettoyage()
+    void GamePabst::endGame(int cpt)
+    {
+        nettoyage(cpt);
+    }
+
+    void GamePabst::nettoyage(int cpt)
     {
         int angle = 0;
 

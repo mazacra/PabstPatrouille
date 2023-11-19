@@ -9,7 +9,7 @@ namespace Module
             //signatures des méthode pour les moteur de déplacement
             void doSmtg();
             bool detectionBallePanier();
-            bool detectionBalleSol(float dist_balle);
+            bool detectionBalleSol(float &dist_balle);
         //private:
             Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_2_4MS, TCS34725_GAIN_16X);
             uint16_t r, g, b, c;
@@ -44,7 +44,7 @@ namespace Module
         }
     }
 
-    bool ModulePabst::detectionBalleSol(float dist_balle)
+    bool ModulePabst::detectionBalleSol(float &dist_balle)
     {
             if (SONAR_GetRange(SONAR_BAS) < SONAR_GetRange(SONAR_HAUT))
             {
