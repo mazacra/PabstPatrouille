@@ -58,4 +58,123 @@ namespace Game
 
         return pointCounter;
     }
+
+    void GamePabst::nettoyage()
+    {
+        int angle = 0;
+
+        retourHome(angle);
+    }
+
+    void GamePabst::retourHome(int angle)
+    {
+        if (angle != 0 || angle != 180)
+        {
+            //On ce remet à 0 deg
+            if(angle = 180)
+                tGauche(angle);
+            else
+                tDroite(360 - angle);
+
+            //Avance jusqu'au mur "sud"
+            while(SONAR_GetRange(0) > 10){
+                demarrer(0.2, 0.2);
+            }
+            demarrer(0, 0);
+
+            //Tourne vers le centre
+            if(angle <= 180)
+            {
+                tGauche(90);
+                if(SONAR_GetRange(0) < 100) //Si pas du bon coté (juste au cas où)
+                    tGauche(180);
+            }
+            else
+            {
+                tDroite(90);
+                if(SONAR_GetRange(0) < 100) //Si pas du bon coté (juste au cas où)
+                    tDroite(180);
+            }
+
+            //avancer jusqu'au centre
+            while(SONAR_GetRange(0) > 100){
+                demarrer(0.2, 0.2);
+            }
+            demarrer(0, 0);
+
+            //cherche le bord
+            while(SONAR_GetRange(0) > 10){
+                demarrer(0.2, -0.2);
+            }
+            demarrer(0,0);
+        }
+        else
+        {
+            tDroite(90);
+            short dir;
+
+            //angle 0 et 180
+            if(angle == 180)
+            {
+                //regarde à droite
+                if(SONAR_GetRange(0) > 100)
+                {
+                    //trop a gauche
+                    while (SONAR_GetRange(0) > 100)
+                    {
+                        demarrer(0.2, 0.2);
+                    }
+                    demarrer(0, 0);
+                    tDroite(90);
+                }
+                else if (SONAR_GetRange(0) < 100)
+                {
+                    //trop a droite
+                    tDroite(180);
+                    while (SONAR_GetRange(0) > 100)
+                    {
+                        demarrer(0.2, 0.2);
+                    }
+                    demarrer(0, 0);
+                    tGauche(90);
+                }
+                else
+                {
+                    tDroite(180);
+                }
+            }
+            else
+            {
+                //regarde à gauche
+                if(SONAR_GetRange(0) > 100)
+                {
+                    //trop a droite
+                    while (SONAR_GetRange(0) > 100)
+                    {
+                        demarrer(0.2, 0.2);
+                    }
+                    demarrer(0, 0);
+                    tGauche(90);
+                }
+                else if (SONAR_GetRange(0) < 100)
+                {
+                    //trop a gauche
+                    tDroite(180);
+                    while (SONAR_GetRange(0) > 100)
+                    {
+                        demarrer(0.2, 0.2);
+                    }
+                    demarrer(0, 0);
+                    tDroite(90);
+                }
+            }
+
+            //avance jusqu'au homebase
+            while (SONAR_GetRange(0) > 10)
+            {
+                demarrer(0.2, 0.2);
+            }
+            demarrer(0, 0);
+        }
+    }
 }
