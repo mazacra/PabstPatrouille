@@ -1,12 +1,15 @@
 #include "moteurPabst.h"
+#include "modulePabst.h"
 #include <Arduino.h>
 #include <LibRobus.h>
 
 using namespace Moteur;
+using namespace Module;
 
 namespace Game
 {
     MoteurPabst moteur;
+    ModulePabst module;
     float tempsStart;
 
     class GamePabst
@@ -67,6 +70,21 @@ namespace Game
     void GamePabst::nettoyage(int cpt)
     {
         int angle = 0;
+        float distance = 0;
+        
+        while(cpt<10){
+            demarrer(0.2, -0.2);
+            if(module.detectionBalleSol(distance))
+            {
+                demarrer(0, 0);
+                moteur.vitesseConstante(distance, 0.2, 0.2);
+                cpt++;
+                delay(500);
+
+            }
+          
+
+        }
 
         retourHome(angle);
     }

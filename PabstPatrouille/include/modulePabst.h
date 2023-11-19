@@ -25,6 +25,7 @@ namespace Module
 
     }
 
+
     bool ModulePabst::detectionBallePanier()
     {
 	    tcs.getRawData(&r, &g, &b, &c);
@@ -51,5 +52,7 @@ namespace Module
                 dist_balle = SONAR_GetRange(SONAR_BAS); //"Retourne" la distance de la balle détectée en cm
                 return true;
             }
+
+            return false;
     }
 }
