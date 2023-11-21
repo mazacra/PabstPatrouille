@@ -11,6 +11,7 @@ namespace Game
     MoteurPabst moteur;
     ModulePabst module;
     float tempsStart;
+    int angle = 0;
 
     class GamePabst
     {
@@ -20,7 +21,7 @@ namespace Game
             int currentGame();
             void endGame(int cpt);
             void nettoyage(int cpt);
-            void retourHome(int angle);
+            void retourHome();
         private:
             
     };
@@ -53,7 +54,7 @@ namespace Game
 
         while (millis() < (tempsStart + (1000 * 60)))
         {
-            if(true) //si détecte qqc
+            if(module.detectionBallePanier()) //si détecte qqc
             {
                 pointCounter++;
             }
@@ -69,7 +70,6 @@ namespace Game
 
     void GamePabst::nettoyage(int cpt)
     {
-        int angle = 0;
         float distance = 0;
         
         while(cpt<10){
@@ -80,16 +80,13 @@ namespace Game
                 moteur.vitesseConstante(distance, 0.2, 0.2);
                 cpt++;
                 delay(500);
-
             }
-          
-
         }
 
-        retourHome(angle);
+        retourHome();
     }
 
-    void GamePabst::retourHome(int angle)
+    void GamePabst::retourHome()
     {
         if (angle != 0 || angle != 180)
         {
