@@ -20,21 +20,21 @@ namespace Moteur
         private:
     };
 
-    float diffClic(){
+    float MoteurPabst::diffClic(){
 	    int clic0 = ENCODER_Read(LEFT);
 	    int clic1 = ENCODER_Read(RIGHT);
 
 	    return (clic0 - clic1)/2;
     }
 
-    void arret(){
+    void MoteurPabst::arret(){
         MOTOR_SetSpeed(LEFT, 0);
         MOTOR_SetSpeed(RIGHT, 0);
         ENCODER_Reset(LEFT);
         ENCODER_Reset(RIGHT);
     }
 
-    void demarrer(float vitesseG, float vitesseD){
+    void MoteurPabst::demarrer(float vitesseG, float vitesseD){
 	    ENCODER_Reset(LEFT);	//Reset encoder
 	    ENCODER_Reset(RIGHT);	//Reset encoder
 
@@ -42,7 +42,7 @@ namespace Moteur
 	    MOTOR_SetSpeed(RIGHT, vitesseD);	//Changement de vitesse
     }
 
-    void tGauche(int angle)				//angle en degré
+    void MoteurPabst::tGauche(int angle)				//angle en degré
     {
         ENCODER_Reset(LEFT);							//Reset encoder
         ENCODER_Reset(RIGHT);							//Reset encoder
@@ -56,7 +56,7 @@ namespace Moteur
     	}	
     }
 
-    void tDroite(int angle)				//angle en degré
+    void MoteurPabst::tDroite(int angle)				//angle en degré
     {
         ENCODER_Reset(LEFT);							//Reset encoder
         ENCODER_Reset(RIGHT);							//Reset encoder
@@ -71,7 +71,7 @@ namespace Moteur
         }
     }
 
-    void vitesseConstante(float distance, float vitesseg,float vitessed) //distance à parcourir en cm
+    void MoteurPabst::vitesseConstante(float distance, float vitesseg,float vitessed) //distance à parcourir en cm
     {
 	    int idelay = 100;
   	    float vitesseG = vitesseg;
@@ -93,7 +93,7 @@ namespace Moteur
 	    }
     }
 
-    void rotationGauche(float vitesse)
+    void MoteurPabst::rotationGauche(float vitesse)
     {
         //Reset encoder
         ENCODER_Reset(LEFT);
@@ -103,7 +103,7 @@ namespace Moteur
 	    MOTOR_SetSpeed(RIGHT, -(vitesse));
     }
 
-    void rotationDroite(float vitesse)
+    void MoteurPabst::rotationDroite(float vitesse)
     {
         //Reset encoder
         ENCODER_Reset(LEFT);
