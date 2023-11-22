@@ -52,7 +52,7 @@ namespace Game
     {
         int pointCounter = 0;
 
-        while (millis() < (tempsStart + (1000 * 60)))
+        while (millis() < (tempsStart + (60000)))
         {
             if(module.detectionBallePanier()) //si détecte qqc
             {
@@ -91,7 +91,7 @@ namespace Game
         if (angle != 0 || angle != 180)
         {
             //On ce remet à 0 deg
-            if(angle = 180)
+            if(angle == 180)
                 moteur.tGauche(angle);
             else
                 moteur.tDroite(360 - angle);
@@ -131,7 +131,6 @@ namespace Game
         else
         {
             moteur.tDroite(90);
-            short dir;
 
             //angle 0 et 180
             if(angle == 180)

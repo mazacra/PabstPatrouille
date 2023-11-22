@@ -6,8 +6,6 @@ namespace Module
     class ModulePabst
     {
         public:
-            //signatures des méthode pour les moteur de déplacement
-            void doSmtg();
             bool detectionBallePanier();
             bool detectionBalleSol(float &dist_balle);
         //private:
@@ -19,11 +17,6 @@ namespace Module
             int SONAR_HAUT = 1;//plug dans J4
 
     };
-    
-    void ModulePabst::doSmtg()
-    {
-
-    }
 
 
     bool ModulePabst::detectionBallePanier()

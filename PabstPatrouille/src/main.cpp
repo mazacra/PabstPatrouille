@@ -1,12 +1,12 @@
 #include <Arduino.h>
 #include <LibRobus.h>
 #include <Adafruit_TCS34725.h>
-#include "gamePabst.h"
+#include "menuPabst.h"
 
-using namespace Game;
+using namespace Menu;
 
 //Global var
-GamePabst game;
+MenuPabst menu;
 int diff = 0;
 int cpt;
 
@@ -19,11 +19,7 @@ void setup()
 
 void loop() 
 {
+	Serial.print(1);
 	//LCD AFFICHAGE MENU
-
-	if(true)//if bouton pressed
-	{	
-		cpt = game.startGame(diff);
-		game.endGame(cpt);
-	}
+	menu.MenuStart();
 }
