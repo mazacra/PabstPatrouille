@@ -22,6 +22,7 @@ namespace Game
             void endGame(int cpt);
             void nettoyage(int cpt);
             void retourHome();
+            void mode1();
         private:
             
     };
@@ -31,21 +32,46 @@ namespace Game
         //Déplacer le robot dans la "zone" jeu
         moteur.tDroite(180);
         moteur.vitesseConstante(150, 0.5, 0.5); //Changer la distance où on veux dans le 2x2 mètre
+        Serial.println("123");
         
         switch (diff)
         {
             case 1:
-                /* code */
+                moteur.tDroite(90);
+                tempsStart = millis();
+                mode1();
                 break;
             
             default:
+                Serial.println("non");
                 moteur.tDroite(180);
                 break;
         }
 
-        tempsStart = millis();
-
         return currentGame();
+    }
+
+    void GamePabst::mode1()
+    {
+        Serial.println("debut");
+        moteur.avancerMode1(50, tempsStart);
+        Serial.println(tempsStart);
+
+        while(true)
+        {
+            Serial.println("boucle");
+            if(!moteur.reculerMode1(100,tempsStart))
+                break;
+
+            moteur.arret();
+            
+            if(!moteur.avancerMode1(100,tempsStart))
+                break;
+
+            moteur.arret();
+        }
+        Serial.println(millis() - tempsStart);
+        Serial.println("fin");
     }
 
     int GamePabst::currentGame()
