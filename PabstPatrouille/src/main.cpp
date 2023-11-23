@@ -22,4 +22,11 @@ void loop()
 	Serial.print(1);
 	//LCD AFFICHAGE MENU
 	menu.MenuStart();
+
+	/*if(true)//if bouton pressed
+	{	
+		cpt = game.startGame(diff);
+		game.endGame(cpt);
+	}*/
+	game.startGame(4);
 }

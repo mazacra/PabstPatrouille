@@ -37,8 +37,8 @@ namespace Moteur
     }
 
     void MoteurPabst::demarrer(float vitesseG, float vitesseD){
-	    ENCODER_Reset(LEFT);	//Reset encoder
-	    ENCODER_Reset(RIGHT);	//Reset encoder
+	    //ENCODER_Reset(LEFT);	//Reset encoder                 enlever
+	    //ENCODER_Reset(RIGHT);	//Reset encoder
 
 	    MOTOR_SetSpeed(LEFT, vitesseG);		//Changement de vitesse
 	    MOTOR_SetSpeed(RIGHT, vitesseD);	//Changement de vitesse
@@ -113,62 +113,5 @@ namespace Moteur
 
         MOTOR_SetSpeed(LEFT, -(vitesse));
 	    MOTOR_SetSpeed(RIGHT, vitesse);
-    }
-
-    bool MoteurPabst::avancerMode1(float distance, float tempsStart)
-    {
-	    int idelay = 100;
-        float vitesseG = 0.15;
-        float vitesseD = 0.15;
-	    float ponderation = 0.0001;
-	    float distanceEncoder = (distance / CIRCONFERENCE_ROUE) * 3200;
-
-	    ENCODER_Reset(LEFT);
-	    ENCODER_Reset(RIGHT);
-
-	    while (!(ENCODER_Read(RIGHT) > distanceEncoder && ENCODER_Read(LEFT) > distanceEncoder))
-	    {
-            Serial.println("entrer");
-            if((millis() - tempsStart) < 60000)
-		    {	
-                MOTOR_SetSpeed(LEFT, vitesseG);											//Changement de vitesse
-	    	    MOTOR_SetSpeed(RIGHT, vitesseD);										//Changement de vitesse
-	    	    delay(idelay);
-			
-		        vitesseG = (vitesseG - diffClic()*ponderation);
-		        vitesseD = (vitesseD + diffClic()*ponderation);
-		    }
-            else
-                return false;
-	    }
-        return true;
-    }
-
-    bool MoteurPabst::reculerMode1(float distance, float tempsStart)
-    {
-	    int idelay = 100;
-        float vitesseG = -0.15;
-        float vitesseD = -0.15;
-	    float ponderation = 0.0001;
-	    float distanceEncoder = -(distance / CIRCONFERENCE_ROUE) * 3200;
-
-	    ENCODER_Reset(LEFT);
-	    ENCODER_Reset(RIGHT);
-
-	    while (!(ENCODER_Read(RIGHT) < distanceEncoder && ENCODER_Read(LEFT) < distanceEncoder))
-	    {
-            if((millis() - tempsStart) < 60000)
-		    {										
-			    MOTOR_SetSpeed(LEFT, vitesseG);											//Changement de vitesse
-	    	    MOTOR_SetSpeed(RIGHT, vitesseD);										//Changement de vitesse
-	    	    delay(idelay);
-			
-		        vitesseG = (vitesseG - diffClic()*ponderation);
-		        vitesseD = (vitesseD + diffClic()*ponderation);
-		    }
-            else
-                return false;
-	    }
-        return true;
     }
 }
