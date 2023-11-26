@@ -258,7 +258,7 @@ namespace Game
                 pointCounter++;
             }
         }
-
+        Serial.println("GAME DONE");
         return pointCounter;
     }
 
@@ -275,8 +275,10 @@ namespace Game
             moteur.demarrer(0.2, -0.2);
             if(module.detectionBalleSol(distance))
             {
+                Serial.println(distance);
                 moteur.demarrer(0, 0);
                 moteur.vitesseConstante(distance, 0.2, 0.2);
+                moteur.arret();
                 cpt++;
                 delay(500);
             }

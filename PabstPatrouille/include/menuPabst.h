@@ -19,11 +19,6 @@ namespace Menu
     class MenuPabst
     {
         public:
-            MenuPabst() {
-                lcd.init();
-                lcd.backlight();
-            }
-
             void MenuStart();
             void MenuSelectDiff();
         private:
@@ -32,23 +27,24 @@ namespace Menu
     
     void MenuPabst::MenuStart()
     {
-        Serial.print("2");
-
         lcd.setCursor(0,0);
-        lcd.println("--------Menu--------");
-        lcd.println("    Devant: score   ");
-        lcd.println("Derriere:  commencer");
+        lcd.print("--------Menu--------");
+        lcd.setCursor(0,1);
+        lcd.print("    Devant: score   ");
+        lcd.setCursor(0,2);
+        lcd.print("Derriere:  commencer");
+        lcd.setCursor(0,3);
         lcd.print("--------------------");
 
         while (true)
         {
             if(ROBUS_IsBumper(BUMPAVANT))
             {
-                MenuSelectDiff();
                 return;
             }
             if(ROBUS_IsBumper(BUMPARRIERE))
             {
+                MenuSelectDiff();
                 return;
             }
         } 
@@ -56,27 +52,33 @@ namespace Menu
 
     void MenuPabst::MenuSelectDiff()
     {
-        int cpt, diff;
+        int cpt;
+        int diff = 0;
 
         lcd.setCursor(0,0);
-        lcd.println("Selection difficulte");
-        lcd.println("<--      0       -->");
-        lcd.println("Derriere:  commencer");
+        lcd.print("Selection difficulte");
+        lcd.setCursor(0,1);
+        lcd.print("<--      0       -->");
+        lcd.setCursor(0,2);
+        lcd.print("Derriere:  commencer");
+        lcd.setCursor(0,3);
         lcd.print("--------------------");
-
+        
+        delay(500);
         while (true)
         {
             if(ROBUS_IsBumper(BUMPARRIERE)){
+                lcd.clear();
                 cpt = game.startGame(diff);
-		        game.endGame(cpt);
+	            game.endGame(cpt);
                 return;
             }
 
             if(ROBUS_IsBumper(BUMPDROITE)){
-                if(diff < 1)
+                if(diff < 4)
                 {
                     diff++;
-                    lcd.setCursor(1,9);
+                    lcd.setCursor(9,1);
                     lcd.print(diff);
                 }
             }
@@ -84,7 +86,7 @@ namespace Menu
                 if(diff > 0)
                 {
                     diff--;
-                    lcd.setCursor(1,9);
+                    lcd.setCursor(9,1);
                     lcd.print(diff);
                 }
             }

@@ -13,13 +13,15 @@ int cpt;
 void setup() 
 {
 	BoardInit(); //Init libraire LibRobus
-    
+
+    lcd.init();
+    lcd.backlight();
+
 	Serial.begin(9600);
 }
 
 void loop() 
 {
-	Serial.print(1);
 	//LCD AFFICHAGE MENU
 	menu.MenuStart();
 
@@ -28,5 +30,5 @@ void loop()
 		cpt = game.startGame(diff);
 		game.endGame(cpt);
 	}*/
-	game.startGame(4);
+	//game.startGame(4);
 }

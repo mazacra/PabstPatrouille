@@ -3,6 +3,8 @@
 
 namespace Module
 {
+    bool scored = false;
+
     class ModulePabst
     {
         public:
@@ -22,20 +24,18 @@ namespace Module
     bool ModulePabst::detectionBallePanier()
     {
 	    tcs.getRawData(&r, &g, &b, &c);
-	    tcs.getRawData(&r, &g, &b, &c);
+        tcs.getRawData(&r, &g, &b, &c);
 
-        if (r == 0 && g == 0 && b == 0)
-        {
-        //Détection de la couleur noir (donc si aucune balle ne passe devant le sensor) 
-        //--> j'ai mis des valeurs aléatoires, va falloir vérifier les valeurs de r g b une fois le sensor bien placé
-            return false;
+        if((r > 9 && b > 9 && g > 9) && !scored){
+            scored = true;
+            Serial.println("GOAL");
+        	return true;
         }
-
-        else
-        {
-            //Si il détecte n'importe quoi autre que noir, ca veut dire qu'il a détecté l'entrée d'une balle
-            return true;
+        if((r < 10 && b < 10 && g < 10) && scored){
+            scored = false;
+        	return false;
         }
+        return false;
     }
 
     bool ModulePabst::detectionBalleSol(float &dist_balle)
