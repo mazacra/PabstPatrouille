@@ -80,6 +80,8 @@ namespace Menu
                     diff++;
                     lcd.setCursor(9,1);
                     lcd.print(diff);
+                    while (ROBUS_IsBumper(BUMPDROITE)){}
+                    
                 }
             }
             if(ROBUS_IsBumper(BUMPGAUCHE)){
@@ -88,6 +90,7 @@ namespace Menu
                     diff--;
                     lcd.setCursor(9,1);
                     lcd.print(diff);
+                    while (ROBUS_IsBumper(BUMPGAUCHE)){}
                 }
             }
         }
