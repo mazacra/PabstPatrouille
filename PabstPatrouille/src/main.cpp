@@ -23,7 +23,7 @@ void setup()
 void loop() 
 {
 	//LCD AFFICHAGE MENU
-	menu.MenuFin(menu.MenuStart());
+	//menu.MenuStart();
 
 	/*if(true)//if bouton pressed
 	{	
@@ -31,4 +31,5 @@ void loop()
 		game.endGame(cpt);
 	}*/
 	//game.startGame(4);
+	//game.currentGame();
 }

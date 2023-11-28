@@ -21,7 +21,7 @@ namespace Game
         public:
             //signatures des méthode pour les moteur de déplacement
             int startGame(int diff);
-            int currentGame();
+            int currentGame(int diff);
             void endGame(int cpt);
             void nettoyage(int cpt);
             void retourHome();
@@ -45,31 +45,18 @@ namespace Game
         {
             case 1:
                 moteur.tDroite(90);
-                tempsStart = millis();
-                mode1();
-                moteur.arret();
-                delay(1000);
                 break;
             
             case 2:
-                tempsStart = millis();
-                mode2();
-                moteur.arret();
-                delay(1000);
                 break;
 
             case 3:
-                tempsStart = millis();
-                mode3();
-                moteur.arret();
-                delay(1000);
                 break;
 
              case 4:
-                tempsStart = millis();
-                mode4();
-                moteur.arret();
-                delay(1000);
+                moteur.tGauche(90);
+                moteur.vitesseConstante(30, 0.3, 0.3);
+                moteur.tDroite(90);
                 break;
             
             default:
@@ -80,7 +67,7 @@ namespace Game
         moteur.arret();
         delay(3000);
 
-        return currentGame();
+        return currentGame(diff);
     }
 
     void GamePabst::mode1() //pas tester encore
@@ -240,12 +227,34 @@ namespace Game
         moteur.demarrer(vitesseRoueExterieur, vitesseRoueInterieur);
     }
 
-    int GamePabst::currentGame()
+    int GamePabst::currentGame(int diff)
     {
         int pointCounter = 0;
+        etape = 0;
+        ENCODER_Reset(LEFT);
+        ENCODER_Reset(RIGHT);
+        tempsStart = millis();
 
         while (millis() < (tempsStart + (60000)))
         {
+            switch(diff)
+            {
+                case 1:
+                    mode1();
+                    break;
+                
+                 case 2:
+                    mode2();
+                    break;
+
+                case 3:
+                    mode3();
+                    break;
+
+                case 4:
+                    mode4();
+                    break;
+            }
             if(module.detectionBallePanier()) //si détecte qqc
             {
                 pointCounter++;
