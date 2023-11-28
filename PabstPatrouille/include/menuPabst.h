@@ -20,9 +20,10 @@ namespace Menu
     {
         public:
             void initializeTopScores();
-            void MenuStart();
-            void MenuSelectDiff();
-            void MenuFin();
+            pointage MenuStart();
+            pointage MenuSelectDiff();
+            pointage MenuSelectMulti(int diff);
+            void MenuFin(int pointV, int pointO = -1);
             void MenuTopFive(int top[]);
 
             static int top[5];
@@ -40,7 +41,7 @@ namespace Menu
         }
     }
 
-    void MenuPabst::MenuStart()
+    pointage MenuPabst::MenuStart()
     {
         lcd.setCursor(0,0);
         lcd.print("--------Menu--------");
@@ -55,18 +56,17 @@ namespace Menu
         {
             if(ROBUS_IsBumper(BUMPAVANT))
             {
-                return;
+                //MenuPabst::MenuTopFive();
             }
             if(ROBUS_IsBumper(BUMPARRIERE))
             {
-                return MenuSelectDiff();
+                return MenuPabst::MenuSelectDiff();
             }
         } 
     }
 
-    void MenuPabst::MenuSelectDiff()
+    pointage MenuPabst::MenuSelectDiff()
     {
-        int cpt;
         int diff = 0;
 
         lcd.setCursor(0,0);
@@ -83,9 +83,7 @@ namespace Menu
         {
             if(ROBUS_IsBumper(BUMPARRIERE)){
                 lcd.clear();
-                //cpt = game.startGame(diff);
-                cpt = game.pointsVert + game.pointsOrange; //points total
-	            game.endGame(cpt);
+                return MenuPabst::MenuSelectMulti(diff);
                 //return cpt;
             }
 
@@ -111,7 +109,44 @@ namespace Menu
         }
     }
 
-    void MenuPabst::MenuFin()
+    pointage MenuPabst::MenuSelectMulti(int diff)
+    {
+        bool mutlijoueur = false;
+
+        lcd.setCursor(0,0);
+        lcd.print(" Selection  Joueurs ");
+        lcd.setCursor(0,1);
+        lcd.print("<--     SOLO     -->");
+        lcd.setCursor(0,2);
+        lcd.print("Derriere:  commencer");
+        lcd.setCursor(0,3);
+        lcd.print("--------------------");
+        
+        delay(500);
+        while (true)
+        {
+            if(ROBUS_IsBumper(BUMPARRIERE)){
+                lcd.clear();
+                return game.startGame(diff, mutlijoueur);
+                //return cpt;
+            }
+
+            if(ROBUS_IsBumper(BUMPDROITE)){
+                mutlijoueur = true;
+                lcd.setCursor(7,1);
+                lcd.print("MULTI");
+                while (ROBUS_IsBumper(BUMPDROITE)){}
+            }
+            if(ROBUS_IsBumper(BUMPGAUCHE)){
+                mutlijoueur = false;
+                lcd.setCursor(8,1);
+                lcd.print("SOLO");
+                while (ROBUS_IsBumper(BUMPGAUCHE)){}
+            }
+        }
+    }
+
+    void MenuPabst::MenuFin(int pointV, int pointO = -1)
     {
         lcd.setCursor(0,0);
         lcd.print("-----Bien joué!-----");
@@ -125,6 +160,8 @@ namespace Menu
         lcd.print("Derriere:  quitter");
         lcd.setCursor(0,3);
         lcd.print("--------------------");
+
+        game.nettoyage();
 
         while (true)
         {

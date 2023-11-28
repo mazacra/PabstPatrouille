@@ -14,16 +14,24 @@ namespace Game
     int angle = 0;
     int etape = 0;
     int cptrMode3 = 0;
+    bool multiJ = false;
+    
+    struct pointage
+    {
+        int pointV;
+        int pointO;
+    };
     
 
     class GamePabst
     {
         public:
             //signatures des méthode pour les moteur de déplacement
-            void startGame(int diff);
-            void currentGame(int &pointsVert, int &pointsOrange);
+            pointage startGame(int diff, bool multi);
+            pointage currentGame(int &pointsVert, int &pointsOrange, int diff);
             void endGame(int cpt);
-            void nettoyage(int cpt);
+            void prepNettoyage();
+            void nettoyage();
             void retourHome();
             void mode1();
             void mode2();
@@ -40,9 +48,10 @@ namespace Game
             
     };
 
-    void GamePabst::startGame(int diff)
+    pointage GamePabst::startGame(int diff, bool multi)
     {
         //Déplacer le robot dans la "zone" jeu
+        multiJ = multi;
         moteur.tDroite(180);
         moteur.vitesseConstante(150, 0.5, 0.5); //Changer la distance où on veux dans le 2x2 mètre
         Serial.println("123");
@@ -73,7 +82,7 @@ namespace Game
         moteur.arret();
         delay(3000);
 
-        currentGame(pointsVert, pointsOrange); //pour savoir cb de points
+        return currentGame(pointsVert, pointsOrange, diff); //pour savoir cb de points
         //return currentGame();
     }
 
@@ -234,26 +243,56 @@ namespace Game
         moteur.demarrer(vitesseRoueExterieur, vitesseRoueInterieur);
     }
 
-    void GamePabst::currentGame(int &pointsVert, int &pointsOrange)
+    pointage GamePabst::currentGame(int &pointsVert, int &pointsOrange, int diff)
     {
         pointsVert = 0;
         pointsOrange = 0;
+        ENCODER_Reset(0);
+        ENCODER_Reset(1);
+        tempsStart = millis();
 
         while (millis() < (tempsStart + (60000)))
         {
-            if(module.detectionBallePanierTemp() == 1) //si détecte balle verte
+            switch(diff)
             {
-                pointsVert++;
+                case 1:
+                    mode1();
+                    break;
+                
+                 case 2:
+                    mode2();
+                    break;
+                case 3:
+                    mode3();
+                    break;
+                case 4:
+                    mode4();
+                    break;
             }
 
-            if(module.detectionBallePanierTemp() == 2) //si détecte balle orange
-            {
-                pointsOrange++;
+            if(multiJ){
+                if(module.detectionBallePanierTemp() != 0)
+                    pointsVert++;
+            }else{
+                if(module.detectionBallePanierTemp() == 1) //si détecte balle verte
+                {
+                    pointsVert++;
+                }
+
+                if(module.detectionBallePanierTemp() == 2) //si détecte balle orange
+                {
+                    pointsOrange++;
+                }
             }
         }
         Serial.println("GAME DONE");
 
         joueurGagnant(pointsVert, pointsOrange, scoreGagnant, couleurGagnante);//joueur gagnant
+
+        pointage pointageFinal;
+        pointageFinal.pointV = pointsVert;
+        pointageFinal.pointO = pointsOrange;
+        return pointageFinal;
     }
 
     void GamePabst::endGame(int cpt)
@@ -261,7 +300,7 @@ namespace Game
         //nettoyage(cpt);
     }
 
-    void prepNettoyage(){
+    void GamePabst::prepNettoyage(){
         while (ROBUS_ReadIR(2) < 400)
         {
             MOTOR_SetSpeed(LEFT, 0.16);
@@ -323,10 +362,10 @@ namespace Game
         moteur.tourneDir(RIGHT);
     }
 
-    void nettoyage(){
+    void GamePabst::nettoyage(){
         bool dirTournant = 1;
 
-        prepNettoyage();
+        GamePabst::prepNettoyage();
         while (true)
         {
             moteur.avanceDistance(1.7);
