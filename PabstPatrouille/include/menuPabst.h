@@ -19,14 +19,28 @@ namespace Menu
     class MenuPabst
     {
         public:
-            int MenuStart();
-            int MenuSelectDiff();
-            void MenuFin(int cpt);
+            void initializeTopScores();
+            void MenuStart();
+            void MenuSelectDiff();
+            void MenuFin();
+            void MenuTopFive(int top[]);
+
+            static int top[5];
+
         private:
 
     };
-    
-    int MenuPabst::MenuStart()
+
+    // Initialisation des scores au démarrage du programme
+    void MenuPabst::initializeTopScores()//initialiser avec setup()
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            top[i] = 0;
+        }
+    }
+
+    void MenuPabst::MenuStart()
     {
         lcd.setCursor(0,0);
         lcd.print("--------Menu--------");
@@ -50,7 +64,7 @@ namespace Menu
         } 
     }
 
-    int MenuPabst::MenuSelectDiff()
+    void MenuPabst::MenuSelectDiff()
     {
         int cpt;
         int diff = 0;
@@ -69,9 +83,10 @@ namespace Menu
         {
             if(ROBUS_IsBumper(BUMPARRIERE)){
                 lcd.clear();
-                cpt = game.startGame(diff);
+                //cpt = game.startGame(diff);
+                cpt = game.pointsVert + game.pointsOrange; //points total
 	            game.endGame(cpt);
-                return cpt;
+                //return cpt;
             }
 
             if(ROBUS_IsBumper(BUMPDROITE)){
@@ -96,13 +111,16 @@ namespace Menu
         }
     }
 
-    void MenuPabst::MenuFin(int cpt)
+    void MenuPabst::MenuFin()
     {
         lcd.setCursor(0,0);
         lcd.print("-----Bien joué!-----");
         lcd.setCursor(6,1);
-        lcd.print(cpt);
-        lcd.print(" points");
+        lcd.print(game.pointsVert);
+        lcd.print(" points pour Vert");
+        lcd.setCursor(7,1);
+        lcd.print(game.pointsOrange);
+        lcd.print(" points pour Orange");
         lcd.setCursor(0,2);
         lcd.print("Derriere:  quitter");
         lcd.setCursor(0,3);
@@ -116,4 +134,37 @@ namespace Menu
         
     }
 
+    void MenuPabst::MenuTopFive(int top[])
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            if (top[i] < game.scoreGagnant)
+            {
+                top[i] = game.scoreGagnant;
+                break;
+            }
+        }
+
+        //Afficher le top5
+        lcd.setCursor(0,0);
+        lcd.print("--------Top 5--------");
+        lcd.setCursor(0,1);
+        lcd.print("    1.   ");
+        lcd.print(top[0]);
+        lcd.setCursor(0,2);
+        lcd.print("    2.   ");
+        lcd.print(top[1]);
+        lcd.setCursor(0,3);
+        lcd.print("    3.   ");
+        lcd.print(top[2]);
+        lcd.setCursor(0,4);
+        lcd.print("    4.   ");
+        lcd.print(top[3]);
+        lcd.setCursor(0,5);
+        lcd.print("    5.   ");
+        lcd.print(top[5]);
+
+
+
+    }
 }

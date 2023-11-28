@@ -18,8 +18,8 @@ namespace Game
     {
         public:
             //signatures des méthode pour les moteur de déplacement
-            int startGame(int diff);
-            int currentGame();
+            void startGame(int diff);
+            void currentGame(int &pointsVert, int &pointsOrange);
             void endGame(int cpt);
             void nettoyage(int cpt);
             void retourHome();
@@ -27,12 +27,18 @@ namespace Game
             void mode2();
             void mode3();
             void mode4();
+            void joueurGagnant(int pointsVert, int pointsOrange, int scoreGagnat, char couleurGagnante[]);
+
+            int pointsVert;
+            int pointsOrange;
+            int scoreGagnant;
+            char couleurGagnante[10];
 
         private:
             
     };
 
-    int GamePabst::startGame(int diff)
+    void GamePabst::startGame(int diff)
     {
         //Déplacer le robot dans la "zone" jeu
         moteur.tDroite(180);
@@ -78,7 +84,8 @@ namespace Game
         moteur.arret();
         delay(3000);
 
-        return currentGame();
+        currentGame(pointsVert, pointsOrange); //pour savoir cb de points
+        //return currentGame();
     }
 
     void GamePabst::mode1() //pas tester encore
@@ -248,19 +255,26 @@ namespace Game
         }
     }
 
-    int GamePabst::currentGame()
+    void GamePabst::currentGame(int &pointsVert, int &pointsOrange)
     {
-        int pointCounter = 0;
+        pointsVert = 0;
+        pointsOrange = 0;
 
         while (millis() < (tempsStart + (60000)))
         {
-            if(module.detectionBallePanier()) //si détecte qqc
+            if(module.detectionBallePanierTemp() == 1) //si détecte balle verte
             {
-                pointCounter++;
+                pointsVert++;
+            }
+
+            if(module.detectionBallePanierTemp() == 2) //si détecte balle orange
+            {
+                pointsOrange++;
             }
         }
         Serial.println("GAME DONE");
-        return pointCounter;
+
+        joueurGagnant(pointsVert, pointsOrange, scoreGagnant, couleurGagnante);//joueur gagnant
     }
 
     void GamePabst::endGame(int cpt)
@@ -396,6 +410,30 @@ namespace Game
                 moteur.demarrer(0.2, 0.2);
             }
             moteur.demarrer(0, 0);
+        }
+    }
+
+    void GamePabst::joueurGagnant(int pointsVert, int pointsOrange, int scoreGagnat, char couleurGagnate[])
+    {
+        int scoreGagnant = 0;
+        char couleurGagnante[10] = "";
+
+        if (pointsVert > pointsOrange)
+        {
+            scoreGagnant = pointsVert;
+            strcpy(couleurGagnante, "Vert");
+        }
+
+        if (pointsVert < pointsOrange)
+        {
+            scoreGagnant = pointsOrange;
+            strcpy(couleurGagnante, "Orange");
+        }
+
+        if (pointsVert == pointsOrange)
+        {
+            scoreGagnant = pointsVert;
+            strcpy(couleurGagnante, "Egalite");
         }
     }
 }
