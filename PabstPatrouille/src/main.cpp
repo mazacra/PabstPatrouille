@@ -23,7 +23,7 @@ void setup()
 void loop() 
 {
 	//LCD AFFICHAGE MENU
-	menu.MenuStart();
+	menu.MenuFin(menu.MenuStart());
 
 	/*if(true)//if bouton pressed
 	{	

@@ -12,6 +12,7 @@ namespace Game
     ModulePabst module;
     float tempsStart;
     int angle = 0;
+    
 
     class GamePabst
     {
@@ -264,27 +265,27 @@ namespace Game
 
     void GamePabst::endGame(int cpt)
     {
-        nettoyage(cpt);
+        //nettoyage(cpt);
     }
 
     void GamePabst::nettoyage(int cpt)
     {
         float distance = 0;
         
-        while(cpt<10){
-            moteur.demarrer(0.2, -0.2);
-            if(module.detectionBalleSol(distance))
-            {
-                Serial.println(distance);
-                moteur.demarrer(0, 0);
-                moteur.vitesseConstante(distance, 0.2, 0.2);
-                moteur.arret();
-                cpt++;
-                delay(500);
-            }
-        }
+        //while(cpt<10){
+        //    moteur.demarrer(0.2, -0.2);
+        //    if(module.detectionBalleSol(distance))
+        //    {
+        //        Serial.println(distance);
+        //        moteur.demarrer(0, 0);
+        //        moteur.vitesseConstante(distance, 0.2, 0.2);
+        //        moteur.arret();
+        //        cpt++;
+        //        delay(500);
+        //    }
+        //}
 
-        retourHome();
+        //retourHome();
     }
 
     void GamePabst::retourHome()

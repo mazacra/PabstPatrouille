@@ -19,13 +19,14 @@ namespace Menu
     class MenuPabst
     {
         public:
-            void MenuStart();
-            void MenuSelectDiff();
+            int MenuStart();
+            int MenuSelectDiff();
+            void MenuFin(int cpt);
         private:
 
     };
     
-    void MenuPabst::MenuStart()
+    int MenuPabst::MenuStart()
     {
         lcd.setCursor(0,0);
         lcd.print("--------Menu--------");
@@ -44,13 +45,12 @@ namespace Menu
             }
             if(ROBUS_IsBumper(BUMPARRIERE))
             {
-                MenuSelectDiff();
-                return;
+                return MenuSelectDiff();
             }
         } 
     }
 
-    void MenuPabst::MenuSelectDiff()
+    int MenuPabst::MenuSelectDiff()
     {
         int cpt;
         int diff = 0;
@@ -71,7 +71,7 @@ namespace Menu
                 lcd.clear();
                 cpt = game.startGame(diff);
 	            game.endGame(cpt);
-                return;
+                return cpt;
             }
 
             if(ROBUS_IsBumper(BUMPDROITE)){
@@ -94,6 +94,26 @@ namespace Menu
                 }
             }
         }
+    }
+
+    void MenuPabst::MenuFin(int cpt)
+    {
+        lcd.setCursor(0,0);
+        lcd.print("-----Bien joué!-----");
+        lcd.setCursor(6,1);
+        lcd.print(cpt);
+        lcd.print(" points");
+        lcd.setCursor(0,2);
+        lcd.print("Derriere:  quitter");
+        lcd.setCursor(0,3);
+        lcd.print("--------------------");
+
+        while (true)
+        {
+            if(ROBUS_IsBumper(BUMPARRIERE))
+                return;
+        }
         
     }
+
 }

@@ -80,7 +80,6 @@ namespace Moteur
 	    int idelay = 100;
   	    float vitesseG = vitesseg;
 	    float vitesseD = vitessed;
-	    float ponderation = 0.0001;
 	    float distanceEncoder = (distance / CIRCONFERENCE_ROUE) * 3200;
 
 	    ENCODER_Reset(LEFT);
@@ -119,7 +118,6 @@ namespace Moteur
 	    int idelay = 100;
         float vitesseG = 0.25;
         float vitesseD = 0.25;
-	    float ponderation = 0.0001;
 	    float distanceEncoder = (distance / CIRCONFERENCE_ROUE) * 3200;
 
 	    ENCODER_Reset(LEFT);
