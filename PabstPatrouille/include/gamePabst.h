@@ -12,6 +12,8 @@ namespace Game
     ModulePabst module;
     float tempsStart;
     int angle = 0;
+    int etape = 0;
+    int cptrMode3 = 0;
     
 
     class GamePabst
@@ -49,31 +51,18 @@ namespace Game
         {
             case 1:
                 moteur.tDroite(90);
-                tempsStart = millis();
-                mode1();
-                moteur.arret();
-                delay(1000);
                 break;
             
             case 2:
-                tempsStart = millis();
-                mode2();
-                moteur.arret();
-                delay(1000);
                 break;
 
             case 3:
-                tempsStart = millis();
-                mode3();
-                moteur.arret();
-                delay(1000);
                 break;
 
              case 4:
-                tempsStart = millis();
-                mode4();
-                moteur.arret();
-                delay(1000);
+                moteur.tGauche(90);
+                moteur.vitesseConstante(30, 0.3, 0.3);
+                moteur.tDroite(90);
                 break;
             
             default:
@@ -92,167 +81,157 @@ namespace Game
     {
         bool condition = true;
         float vitesse = 0.2;
-        ENCODER_Reset(LEFT);
-        while(((50 / CIRCONFERENCE_ROUE) * 3200) > ENCODER_Read(LEFT))
+        if(etape == 0)
         {
-            MOTOR_SetSpeed(LEFT, vitesse);											//Changement de vitesse
-	    	MOTOR_SetSpeed(RIGHT, vitesse);	
-        }
-        while(condition)
-        {
-            ENCODER_Reset(LEFT);
-            while(((100 / CIRCONFERENCE_ROUE) * -3200) > ENCODER_Read(LEFT))
+            if(((50 / CIRCONFERENCE_ROUE) * 3200) > ENCODER_Read(LEFT))
+                moteur.demarrer(vitesse, vitesse);
+            else
             {
-                MOTOR_SetSpeed(LEFT, -vitesse);											//Changement de vitesse
-	    	    MOTOR_SetSpeed(RIGHT, -vitesse);
-                if((millis() - tempsStart) >= 60000)
-                {
-                    condition = false;
-                    break;
-                }	
+                etape = 1;
+                ENCODER_Reset(LEFT);
             }
-
-            ENCODER_Reset(LEFT);
-            while(((100 / CIRCONFERENCE_ROUE) * 3200) > ENCODER_Read(LEFT))
+        }
+        if(etape == 1)
+        {
+            if(((100 / CIRCONFERENCE_ROUE) * -3200) < ENCODER_Read(LEFT))
+                moteur.demarrer(-vitesse, -vitesse);
+            else
             {
-                MOTOR_SetSpeed(LEFT, vitesse);											//Changement de vitesse
-	    	    MOTOR_SetSpeed(RIGHT, vitesse);
-                if((millis() - tempsStart) >= 60000)
-                {
-                    condition = false;
-                    break;
-                }	
+                etape = 2;
+                ENCODER_Reset(LEFT);
+            }
+        }
+        if(etape == 2)
+        {
+            if(((100 / CIRCONFERENCE_ROUE) * 3200) > ENCODER_Read(LEFT))
+                moteur.demarrer(vitesse, vitesse);
+            else
+            {
+                etape = 1;
+                ENCODER_Reset(LEFT);
             }
         }
     }
 
     void GamePabst::mode2()//pas tester encore
     {
-        bool condition = true;
-        while(condition)
+        static int coterAleatoire;
+        static int angleAleatoire;
+        int valeurEncoder;
+        static float vitesseAleatoire;
+ 
+        if(etape == 0)
         {
-            int coterAleatoire = random(1);
-            int angleAleatoire = random(100,180);
-            int valeurEncoder = ((2 * PI * DISTANCE_ENTRE_ROUE * angleAleatoire / 360) * 3200 / CIRCONFERENCE_ROUE)/2;
-            float vitesseTourner = 0.2;
-            int vitesseAleatoire = random(20,30);
-            vitesseAleatoire *= 0.01;
-
-            ENCODER_Reset(LEFT);
-            if(coterAleatoire == 0)
-            {
-                while(valeurEncoder > ENCODER_Read(LEFT))
-                {
-                    moteur.demarrer(-vitesseTourner, vitesseTourner);
-                    if((millis() - tempsStart) >= 60000)
-                    {
-                        condition = false;
-                        break;
-                    }
-                }
-            }
+            if(ROBUS_ReadIR(2) < 150)//avancer jusqua une certaine distance du mur
+                moteur.demarrer(0.2, 0.2);
             else
             {
-                while(valeurEncoder > ENCODER_Read(LEFT))
-                {
-                    moteur.demarrer(-vitesseTourner, vitesseTourner);
-                    if((millis() - tempsStart) >= 60000)
-                    {
-                        condition = false;
-                        break;
-                    }
-                }
+                coterAleatoire = random(2);
+                angleAleatoire = random(100,180);
+                valeurEncoder = ((2 * PI * DISTANCE_ENTRE_ROUE * angleAleatoire / 360) * 3200 / CIRCONFERENCE_ROUE)/2;
+                etape = 1;
+                moteur.arret();
+                ENCODER_Reset(LEFT);
+                ENCODER_Reset(RIGHT);
             }
-            
-            while(true)             //tant que le capteur sonore n'est pas a une certaine distance du mur
+        }
+        if(etape == 1)
+        {
+            Serial.println(coterAleatoire);
+            if(valeurEncoder > ENCODER_Read(RIGHT) && coterAleatoire == 0)
+                moteur.demarrer(-0.2, 0.2);
+            else if(valeurEncoder > ENCODER_Read(LEFT) && coterAleatoire == 1)
+                moteur.demarrer(0.2, -0.2);
+            else
             {
-                if((millis() - tempsStart) >= 60000)
-                {
-                    condition = false;
-                    break;
-                }
+                int nbsAleatoire = random(20,31);
+                vitesseAleatoire = nbsAleatoire * 0.01;
+                etape = 2;
+                moteur.arret();
+                ENCODER_Reset(LEFT);
+                ENCODER_Reset(RIGHT);
+            }
+        }
+        if(etape == 2)
+        {
+            if(ROBUS_ReadIR(2) < 150)//avancer jusqua une certaine distance du mur
                 moteur.demarrer(vitesseAleatoire, vitesseAleatoire);
+            else
+            {
+                coterAleatoire = random(2);
+                angleAleatoire = random(100,180);
+                valeurEncoder = ((2 * PI * DISTANCE_ENTRE_ROUE * angleAleatoire / 360) * 3200 / CIRCONFERENCE_ROUE)/2;
+                etape = 1;
+                moteur.arret();
+                ENCODER_Reset(LEFT);
+                ENCODER_Reset(RIGHT);
             }
         }
     }
 
-    void GamePabst::mode3()//sa marche mais regarder pour les distances une fois dans larene
+    void GamePabst::mode3()//sa marche mais regarder pour les valeur d'encodeur
     {
-        Serial.println("dedans");
-        bool condition = true;
-
         float vitesseRoueExterieur = 0.25;
         
-        float roueInterieurDistance = (2 * PI * (36.37)) / 4;
-	    float roueExterieurDistance = (2 * PI * (55.07)) / 4;
-	    //Calcul la vitesse à laquelle la roue droite doit s'ajuster selon la vitesse de la roue gauche
-	    float rapport = roueInterieurDistance / roueExterieurDistance;
-	    float vitesseRoueInterieur = vitesseRoueExterieur * rapport;
-        int cptr = 0;
-            
-        while(condition)             //tant que le capteur sonore n'est pas a une certaine distance du mur
+        float roueInterieurDistance = (2 * PI * (10)) / 4;
+        float roueExterieurDistance = (2 * PI * (10 + DISTANCE_ENTRE_ROUE)) / 4;
+        //Calcul la vitesse à laquelle la roue droite doit s'ajuster selon la vitesse de la roue gauche
+        float rapport = roueInterieurDistance / roueExterieurDistance;
+        float vitesseRoueInterieur = vitesseRoueExterieur * rapport;
+        
+        if(etape == 0)
         {
-            ENCODER_Reset(LEFT);
-            while(11800 > ENCODER_Read(LEFT))
-            {
-                Serial.println("tournant 1");
+            if(((roueInterieurDistance / CIRCONFERENCE_ROUE) * 3200) + 1200 > ENCODER_Read(LEFT))
                 moteur.demarrer(vitesseRoueInterieur, vitesseRoueExterieur);
-                if((millis() - tempsStart) >= 60000)
-                {
-                    condition = false;
-                    break;
-                }
-            }
-
-            ENCODER_Reset(RIGHT);
-            while(11800 > ENCODER_Read(RIGHT))
+            else
             {
-                moteur.demarrer(vitesseRoueExterieur, vitesseRoueInterieur);
-                if((millis() - tempsStart) >= 60000)
-                {
-                    condition = false;
-                    break;
-                }
-            }
-
-            if((cptr % 2) == 0)
-            {
+                moteur.arret();
+                etape = 1;
                 ENCODER_Reset(RIGHT);
-                Serial.println("tourner complet");
-                while(11800 > ENCODER_Read(RIGHT))
-                {
-                    moteur.demarrer(vitesseRoueExterieur, vitesseRoueInterieur);
-                    if((millis() - tempsStart) >= 60000)
-                    {
-                        condition = false;
-                        break;
-                    }
-                }
+                cptrMode3++;
             }
-            cptr++;
+        }
+        if(etape == 1)
+        {
+            if(((roueInterieurDistance / CIRCONFERENCE_ROUE) * 3200) + 1200 > ENCODER_Read(RIGHT))
+                moteur.demarrer(vitesseRoueExterieur, vitesseRoueInterieur);
+            else
+            {
+                moteur.arret();
+                etape = 0;
+                ENCODER_Reset(LEFT);
+                ENCODER_Reset(RIGHT);
+                cptrMode3++;
+            }
+        }
+        Serial.println("compteur");
+        Serial.println(cptrMode3);
+        Serial.println("etape");
+        Serial.println(etape);
+        if(((cptrMode3 - 2) % 5) == 0 || etape == 3)
+        {
+            etape = 3;
+            if(((roueInterieurDistance / CIRCONFERENCE_ROUE) * 3200) + 1200 > ENCODER_Read(RIGHT))
+                moteur.demarrer(vitesseRoueExterieur, vitesseRoueInterieur);
+            else
+            {
+                etape = 0;
+                ENCODER_Reset(LEFT);
+                cptrMode3++;
+            }
         }
     }
 
     void GamePabst::mode4()//sa marche
     {
-        bool condition = true;
         float vitesseRoueExterieur = 0.25;
         
         float roueInterieurDistance = (2 * PI * (36.37)) / 4;
-	    float roueExterieurDistance = (2 * PI * (55.07)) / 4;
-	    //Calcul la vitesse à laquelle la roue droite doit s'ajuster selon la vitesse de la roue gauche
-	    float rapport = roueInterieurDistance / roueExterieurDistance;
-	    float vitesseRoueInterieur = vitesseRoueExterieur * rapport;
-
-        while(condition)
-        {
-            moteur.demarrer(vitesseRoueExterieur, vitesseRoueInterieur);
-            if((millis() - tempsStart) >= 60000)
-            {
-                condition = false;
-                break;
-            }
-        }
+        float roueExterieurDistance = (2 * PI * (55.07)) / 4;
+        //Calcul la vitesse à laquelle la roue droite doit s'ajuster selon la vitesse de la roue gauche
+        float rapport = roueInterieurDistance / roueExterieurDistance;
+        float vitesseRoueInterieur = vitesseRoueExterieur * rapport;
+        moteur.demarrer(vitesseRoueExterieur, vitesseRoueInterieur);
     }
 
     void GamePabst::currentGame(int &pointsVert, int &pointsOrange)
@@ -282,25 +261,85 @@ namespace Game
         //nettoyage(cpt);
     }
 
-    void GamePabst::nettoyage(int cpt)
-    {
-        float distance = 0;
+    void prepNettoyage(){
+        while (ROBUS_ReadIR(2) < 400)
+        {
+            MOTOR_SetSpeed(LEFT, 0.16);
+            MOTOR_SetSpeed(RIGHT, 0.16);
+        }
+        while (ROBUS_ReadIR(3) < 450)
+        {
+            MOTOR_SetSpeed(LEFT, -0.16);
+            MOTOR_SetSpeed(RIGHT, 0.16);
+        }
+        MOTOR_SetSpeed(LEFT, 0);
+        MOTOR_SetSpeed(RIGHT, 0);
         
-        //while(cpt<10){
-        //    moteur.demarrer(0.2, -0.2);
-        //    if(module.detectionBalleSol(distance))
-        //    {
-        //        Serial.println(distance);
-        //        moteur.demarrer(0, 0);
-        //        moteur.vitesseConstante(distance, 0.2, 0.2);
-        //        moteur.arret();
-        //        cpt++;
-        //        delay(500);
-        //    }
-        //}
+        delay(2000);
 
-        //retourHome();
+        float vg = 0.16;
+
+        while (ROBUS_ReadIR(2) < 400)
+        {
+            MOTOR_SetSpeed(LEFT, vg);
+            MOTOR_SetSpeed(RIGHT, 0.16);
+
+            if (ROBUS_ReadIR(1) > 335)
+            {
+                Serial.println("trop proche");
+                Serial.println(ROBUS_ReadIR(1));
+                MOTOR_SetSpeed(LEFT, 0.20);
+                MOTOR_SetSpeed(RIGHT, 0.40);	
+            }
+            if (ROBUS_ReadIR(1) < 325 && ROBUS_ReadIR(1) > 240)
+            {
+                Serial.println("trop loin");
+                Serial.println(ROBUS_ReadIR(1));
+                MOTOR_SetSpeed(LEFT, 0.40);
+                MOTOR_SetSpeed(RIGHT, 0.20);
+            }
+            //if(ROBUS_ReadIR(1) < ROBUS_ReadIR(3)){
+            //    Serial.println("Gauche");
+            //    if(vg < 0.20)
+            //        vg += 0.01;
+            //}
+            //if(ROBUS_ReadIR(1) > ROBUS_ReadIR(3)){
+            //    Serial.println("Droite");
+            //    if(vg > 0.1)
+            //        vg -= 0.01;
+            //}
+        }
+        while (ROBUS_ReadIR(1) + 50 > ROBUS_ReadIR(3) && ROBUS_ReadIR(1) - 50 < ROBUS_ReadIR(3))
+        {
+            MOTOR_SetSpeed(0, 0.15);
+            MOTOR_SetSpeed(1, -0.15);
+        }
+        
+        MOTOR_SetSpeed(0, 0);
+        MOTOR_SetSpeed(1, 0);
+        ENCODER_Reset(0);
+        ENCODER_Reset(1);
+        moteur.tourneDir(RIGHT);
+        moteur.tourneDir(RIGHT);
     }
+
+    void nettoyage(){
+        bool dirTournant = 1;
+
+        prepNettoyage();
+        while (true)
+        {
+            moteur.avanceDistance(1.7);
+            moteur.tourneDir(dirTournant);
+            if(ROBUS_ReadIR(2) > 100 && ROBUS_ReadIR(1) > 100){
+                break;
+            }
+            moteur.avanceDistance(0.3);
+            moteur.tourneDir(dirTournant);
+            dirTournant = dirTournant == 0 ? 1 : 0;
+        }
+    }
+
 
     void GamePabst::retourHome()
     {
