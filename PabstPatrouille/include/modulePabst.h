@@ -9,6 +9,7 @@ namespace Module
     {
         public:
             bool detectionBallePanier();
+            int detectionBallePanierTemp();
             bool detectionBalleSol(float &dist_balle);
         //private:
             Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_2_4MS, TCS34725_GAIN_16X);
@@ -36,6 +37,39 @@ namespace Module
         	return false;
         }
         return false;
+    }
+
+    int ModulePabst::detectionBallePanierTemp()
+    {
+	    tcs.getRawData(&r, &g, &b, &c);
+        tcs.getRawData(&r, &g, &b, &c);
+
+		//noir : T == 7388
+		//vert : T == 4691
+		//orange : T == 2148
+
+		int temp = tcs.calculateColorTemperature(r, g, b);
+
+		if (temp > 7000)
+		{
+			//NOIR
+			Serial.println("NO GOAL");
+			return 0;
+		}
+
+		if (temp > 4000 && temp < 7000)
+		{
+			//VERT
+			Serial.println("GOAL VERT");
+			return 1;
+		}
+
+		if (temp > 2000 && temp < 4000)
+		{
+			//ORANGE
+			Serial.println("GOAL ORANGE");
+			return 2;
+		}
     }
 
     bool ModulePabst::detectionBalleSol(float &dist_balle)
