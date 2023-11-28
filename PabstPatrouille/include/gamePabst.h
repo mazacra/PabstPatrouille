@@ -268,25 +268,85 @@ namespace Game
         //nettoyage(cpt);
     }
 
-    void GamePabst::nettoyage(int cpt)
-    {
-        float distance = 0;
+    void prepNettoyage(){
+        while (ROBUS_ReadIR(2) < 400)
+        {
+            MOTOR_SetSpeed(LEFT, 0.16);
+            MOTOR_SetSpeed(RIGHT, 0.16);
+        }
+        while (ROBUS_ReadIR(3) < 450)
+        {
+            MOTOR_SetSpeed(LEFT, -0.16);
+            MOTOR_SetSpeed(RIGHT, 0.16);
+        }
+        MOTOR_SetSpeed(LEFT, 0);
+        MOTOR_SetSpeed(RIGHT, 0);
         
-        //while(cpt<10){
-        //    moteur.demarrer(0.2, -0.2);
-        //    if(module.detectionBalleSol(distance))
-        //    {
-        //        Serial.println(distance);
-        //        moteur.demarrer(0, 0);
-        //        moteur.vitesseConstante(distance, 0.2, 0.2);
-        //        moteur.arret();
-        //        cpt++;
-        //        delay(500);
-        //    }
-        //}
+        delay(2000);
 
-        //retourHome();
+        float vg = 0.16;
+
+        while (ROBUS_ReadIR(2) < 400)
+        {
+            MOTOR_SetSpeed(LEFT, vg);
+            MOTOR_SetSpeed(RIGHT, 0.16);
+
+            if (ROBUS_ReadIR(1) > 335)
+            {
+                Serial.println("trop proche");
+                Serial.println(ROBUS_ReadIR(1));
+                MOTOR_SetSpeed(LEFT, 0.20);
+                MOTOR_SetSpeed(RIGHT, 0.40);	
+            }
+            if (ROBUS_ReadIR(1) < 325 && ROBUS_ReadIR(1) > 240)
+            {
+                Serial.println("trop loin");
+                Serial.println(ROBUS_ReadIR(1));
+                MOTOR_SetSpeed(LEFT, 0.40);
+                MOTOR_SetSpeed(RIGHT, 0.20);
+            }
+            //if(ROBUS_ReadIR(1) < ROBUS_ReadIR(3)){
+            //    Serial.println("Gauche");
+            //    if(vg < 0.20)
+            //        vg += 0.01;
+            //}
+            //if(ROBUS_ReadIR(1) > ROBUS_ReadIR(3)){
+            //    Serial.println("Droite");
+            //    if(vg > 0.1)
+            //        vg -= 0.01;
+            //}
+        }
+        while (ROBUS_ReadIR(1) + 50 > ROBUS_ReadIR(3) && ROBUS_ReadIR(1) - 50 < ROBUS_ReadIR(3))
+        {
+            MOTOR_SetSpeed(0, 0.15);
+            MOTOR_SetSpeed(1, -0.15);
+        }
+        
+        MOTOR_SetSpeed(0, 0);
+        MOTOR_SetSpeed(1, 0);
+        ENCODER_Reset(0);
+        ENCODER_Reset(1);
+        moteur.tourneDir(RIGHT);
+        moteur.tourneDir(RIGHT);
     }
+
+    void nettoyage(){
+        bool dirTournant = 1;
+
+        prepNettoyage();
+        while (true)
+        {
+            moteur.avanceDistance(1.7);
+            moteur.tourneDir(dirTournant);
+            if(ROBUS_ReadIR(2) > 100 && ROBUS_ReadIR(1) > 100){
+                break;
+            }
+            moteur.avanceDistance(0.3);
+            moteur.tourneDir(dirTournant);
+            dirTournant = dirTournant == 0 ? 1 : 0;
+        }
+    }
+
 
     void GamePabst::retourHome()
     {

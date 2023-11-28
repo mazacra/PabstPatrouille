@@ -70,6 +70,7 @@ namespace Module
 			Serial.println("GOAL ORANGE");
 			return 2;
 		}
+        return 0;
     }
 
     bool ModulePabst::detectionBalleSol(float &dist_balle)

@@ -4,6 +4,11 @@ namespace Moteur
     #define DISTANCE_ENTRE_ROUE 18.7
     #define CIRCONFERENCE_ROUE 23.939
 
+    int g_diffAvancerG = 0;
+    int g_diffAvancerD = 0;
+    int g_diffTournerG = 0;
+    int g_diffTournerD = 0;
+
     class MoteurPabst
     {
         public:
@@ -18,6 +23,8 @@ namespace Moteur
             void rotationDroite(float vitesse);
             bool avancerMode1(float distance, float tempsStart);
             bool reculerMode1(float distance, float tempsStart);
+            void tourneDir(int dir);
+            void avanceDistance(float distance);
 
         private:
     };
@@ -167,5 +174,112 @@ namespace Moteur
                 return false;
 	    }
         return true;
+    }
+
+    float correction(int encodeurG, int encodeurD, int distG, int distD) 
+    {
+        if (encodeurG == 0 || encodeurD == 0)
+            return 0;
+
+        // Le montant net est calcule avec les valeurs absolues des encodeurs, donc distance parcourue net
+        encodeurG = abs(encodeurG);
+        encodeurD = abs(encodeurD);
+        distG = abs(distG);
+        distD = abs(distD);
+
+        short ajustement = distG > distD ? 1 : -1;
+        int difference = encodeurG - encodeurD;
+        float newSpeed = (((-((ajustement + difference) / 2.0) + encodeurG) / encodeurG) - 1) / 2;
+        return newSpeed;
+    }
+
+    float minmax(float minValue, float value, float maxValue) 
+    {
+        return max(minValue, min(value, maxValue));
+    }
+
+    void MoteurPabst::tourneDir(int dir) {
+        float vitesseMenant = 0;
+        float vitesseSuivant = 0;
+        float correctionMenant = 1;
+        float correctionSuivant = 1;
+        int encodeurMenant = 0;
+        int encodeurSuivant = 0;
+        int distMenant = dir == LEFT ? g_diffAvancerD : g_diffAvancerG;
+        int distSuivant = dir == LEFT ? g_diffAvancerG : g_diffAvancerD;
+        short roueMenante = dir == LEFT ? RIGHT : LEFT;
+    
+        while(distMenant < 1990 || distSuivant > -1990)
+        {
+            int dist = (distMenant - distSuivant) / 2;
+            float vitesse = (0.2 - 0.05) * 1.0 * sin((PI*dist)/1990) + 0.05;
+            vitesseMenant = min(vitesse, 0.2);
+            vitesseSuivant = -vitesseMenant;
+
+            MOTOR_SetSpeed(roueMenante, vitesseMenant * correctionMenant);
+            MOTOR_SetSpeed(!roueMenante, vitesseSuivant * correctionSuivant);
+            delay(20);
+
+            distMenant += encodeurMenant = ENCODER_ReadReset(roueMenante);
+            distSuivant += encodeurSuivant = ENCODER_ReadReset(!roueMenante);
+
+            if (encodeurMenant > 0 && encodeurSuivant < 0) {
+                float ajustement = correction(encodeurMenant, encodeurSuivant, distMenant, distSuivant);
+
+                correctionMenant += ajustement;
+                correctionSuivant -= ajustement;
+            }
+
+            correctionMenant = minmax(0.8, correctionMenant, 1.2);
+            correctionSuivant = minmax(0.8, correctionSuivant, 1.2);
+        }
+        demarrer(0,0);
+
+        distMenant += ENCODER_ReadReset(roueMenante);
+        distSuivant += ENCODER_ReadReset(!roueMenante);
+
+        g_diffTournerG = roueMenante == LEFT ? distMenant - 1990 : distSuivant + 1990;
+        g_diffTournerD = roueMenante == LEFT ? distSuivant + 1990 : distMenant - 1990;
+    }
+
+    void MoteurPabst::avanceDistance(float distance){
+        //                          PULSE/TOUR         CIRCONFÉRENCE
+        const int PULSES_A_PARCOURIR = 3200 * (distance / 0.239389);
+        float vitesseG = 0;
+        float vitesseD = 0;
+        float encodeurG = 0;
+        float encodeurD = 0;
+        float distG = g_diffAvancerG;
+        float distD = g_diffAvancerD;
+        float correctionG = 1;
+        float correctionD = 1;
+        
+        while(distG < PULSES_A_PARCOURIR || distD < PULSES_A_PARCOURIR)
+        {
+            const float dist = (distG + distD) / 2;
+            const float VITESSE_BASE = (0.6 - 0.06) * 1.0 * sin((PI*dist)/PULSES_A_PARCOURIR) + 0.06;
+            vitesseG = vitesseD = min(VITESSE_BASE, 0.6);
+            MOTOR_SetSpeed(LEFT, vitesseG * correctionG);
+            MOTOR_SetSpeed(RIGHT, vitesseD * correctionD);
+            delay(20);
+            distG += encodeurG = ENCODER_ReadReset(LEFT);
+            distD += encodeurD = ENCODER_ReadReset(RIGHT);
+            
+            if (encodeurG > 0 && encodeurD > 0) {
+                const float CORRECTION = correction(encodeurG, encodeurD, distG, distD);
+                correctionG += CORRECTION;
+                correctionD -= CORRECTION;
+            }
+            
+            correctionG = minmax(0.8, correctionG, 1.2);
+            correctionD = minmax(0.8, correctionD, 1.2);
+        }
+        
+        MOTOR_SetSpeed(LEFT, 0);
+        MOTOR_SetSpeed(RIGHT, 0);
+        distG += ENCODER_ReadReset(LEFT);
+        distD += ENCODER_ReadReset(RIGHT);
+        g_diffAvancerG = distG - PULSES_A_PARCOURIR;
+        g_diffAvancerD = distD - PULSES_A_PARCOURIR;
     }
 }
