@@ -11,6 +11,7 @@ using namespace Module;
 
 namespace Game
 {
+    LiquidCrystal_I2C lcdGame(0x27, 20, 4); 
     MoteurPabst moteur;
     ModulePabst module;
     float tempsStart;

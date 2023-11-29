@@ -24,6 +24,8 @@ void setup()
 
     lcd.init();
     lcd.backlight();
+	lcdGame.init();
+	lcdGame.backlight();
 
 	Serial.begin(9600);
 }
