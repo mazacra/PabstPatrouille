@@ -60,18 +60,22 @@ namespace Game
         {
             case 1:
                 moteur.tDroite(90);
+                menu.MenuDebutJeu();
                 break;
             
             case 2:
+            menu.MenuDebutJeu();
                 break;
 
             case 3:
+            menu.MenuDebutJeu();
                 break;
 
              case 4:
                 moteur.tGauche(90);
                 moteur.vitesseConstante(30, 0.3, 0.3);
                 moteur.tDroite(90);
+                menu.MenuDebutJeu();
                 break;
             
             default:
@@ -86,7 +90,7 @@ namespace Game
         //return currentGame();
     }
 
-    void GamePabst::mode1()
+    void GamePabst::mode1() //Aller-retour
     {
         bool condition = true;
         float vitesse = 0.2;
@@ -122,17 +126,17 @@ namespace Game
         }
     }
 
-    void GamePabst::mode2()
+    void GamePabst::mode2()//Mouvements aléatoires
     {
         static int coterAleatoire;
         static int angleAleatoire;
         int valeurEncoder;
-        static float vitesseAleatoire = 0.2;
+        static float vitesseAleatoire;
  
         if(etape == 0)
         {
             if(ROBUS_ReadIR(2) < 150)//avancer jusqua une certaine distance du mur
-                moteur.demarrer(vitesseAleatoire, vitesseAleatoire);
+                moteur.demarrer(0.2, 0.2);
             else
             {
                 coterAleatoire = random(2);
@@ -155,13 +159,13 @@ namespace Game
             {
                 int nbsAleatoire = random(20,31);
                 vitesseAleatoire = nbsAleatoire * 0.01;
-                etape = 0;
+                etape = 2;
                 moteur.arret();
                 ENCODER_Reset(LEFT);
                 ENCODER_Reset(RIGHT);
             }
         }
-        /*if(etape == 2)
+        if(etape == 2)
         {
             if(ROBUS_ReadIR(2) < 150)//avancer jusqua une certaine distance du mur
                 moteur.demarrer(vitesseAleatoire, vitesseAleatoire);
@@ -175,10 +179,10 @@ namespace Game
                 ENCODER_Reset(LEFT);
                 ENCODER_Reset(RIGHT);
             }
-        }*/
+        }
     }
 
-    void GamePabst::mode3()//sa marche mais regarder pour les valeur d'encodeur
+    void GamePabst::mode3()//Mouvements en S
     {
         float vitesseRoueExterieur = 0.25;
         
@@ -190,7 +194,7 @@ namespace Game
         
         if(etape == 0)
         {
-            if(((roueInterieurDistance / CIRCONFERENCE_ROUE) * 3200) + 1200 > ENCODER_Read(LEFT))//
+            if(((roueInterieurDistance / CIRCONFERENCE_ROUE) * 3200) + 1200 > ENCODER_Read(LEFT))
                 moteur.demarrer(vitesseRoueInterieur, vitesseRoueExterieur);
             else
             {
@@ -202,7 +206,7 @@ namespace Game
         }
         if(etape == 1)
         {
-            if(((roueInterieurDistance / CIRCONFERENCE_ROUE) * 3200) + 1200 > ENCODER_Read(RIGHT))//
+            if(((roueInterieurDistance / CIRCONFERENCE_ROUE) * 3200) + 1200 > ENCODER_Read(RIGHT))
                 moteur.demarrer(vitesseRoueExterieur, vitesseRoueInterieur);
             else
             {
@@ -220,7 +224,7 @@ namespace Game
         if(((cptrMode3 - 2) % 5) == 0 || etape == 3)
         {
             etape = 3;
-            if(((roueInterieurDistance / CIRCONFERENCE_ROUE) * 3200) + 1200 > ENCODER_Read(RIGHT))//
+            if(((roueInterieurDistance / CIRCONFERENCE_ROUE) * 3200) + 1200 > ENCODER_Read(RIGHT))
                 moteur.demarrer(vitesseRoueExterieur, vitesseRoueInterieur);
             else
             {
@@ -231,7 +235,7 @@ namespace Game
         }
     }
 
-    void GamePabst::mode4()
+    void GamePabst::mode4()//Mouvement en cercle
     {
         float vitesseRoueExterieur = 0.25;
         
@@ -253,13 +257,12 @@ namespace Game
 
         while (millis() < (tempsStart + (30000)))
         {
-            Serial.println(((tempsStart + 60000) - millis())/100);
             switch(diff)
             {
                 case 1:
                     mode1();
                     break;
-                case 2:
+                 case 2:
                     mode2();
                     break;
                 case 3:
@@ -267,8 +270,6 @@ namespace Game
                     break;
                 case 4:
                     mode4();
-                    break;
-                default:
                     break;
             }
 
@@ -371,7 +372,6 @@ namespace Game
         GamePabst::prepNettoyage();
         while (true)
         {
-
             moteur.avanceDistance(1.7);
             moteur.tourneDir(dirTournant);
             if(ROBUS_ReadIR(2) > 100 && ROBUS_ReadIR(1) > 100){

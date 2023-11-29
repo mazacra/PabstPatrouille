@@ -27,6 +27,8 @@ namespace Menu
             pointage MenuStart();
             pointage MenuSelectDiff();
             pointage MenuSelectMulti(int diff);
+            void MenuDebutJeu();
+            void AffichagePointInGame(int pointsVert, int pointsOrange);
             void MenuFin(int pointV, int pointO = -1);
             void MenuTopFive(int top[]);
 
@@ -156,6 +158,39 @@ namespace Menu
                 lcd.print(" SOLO");
                 while (digitalRead(BOUTONJAUNE)){}////////////
             }
+        }
+    }
+
+    void MenuDebutJeu()
+    {
+        lcd.clear();
+        lcd.setCursor(0,2);
+        lcd.print("---------GO---------");
+
+    }
+
+    void AffichagePointInGame(int pointsVert, int pointsOrange)
+    {
+        if (multiJ)
+        {       
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("V");
+            lcd.setCursor(0,1);
+            lcd.print(pointsVert);
+            lcd.setCursor(10,0);
+            lcd.print("O");
+            lcd.setCursor(10,1);
+            lcd.print(pointsOrange);
+        }
+
+        if (!multiJ)
+        {
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("POINTS");
+            lcd.setCursor(0,1);
+            lcd.print(pointsVert);
         }
     }
 
