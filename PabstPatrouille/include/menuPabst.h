@@ -187,9 +187,9 @@ namespace Menu
         if (!multiJ)
         {
             lcd.clear();
-            lcd.setCursor(0,0);
+            lcd.setCursor(7,0);
             lcd.print("POINTS");
-            lcd.setCursor(0,1);
+            lcd.setCursor(7,1);
             lcd.print(pointsVert);
         }
     }
