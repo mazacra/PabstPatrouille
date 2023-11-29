@@ -28,10 +28,13 @@ void loop()
 {
 	//LCD AFFICHAGE MENU
 	pointage ptg = menu.MenuStart();
-	if(multiJ)
+	if(ptg.pointV != -1)
+	{
+		if(multiJ)
 		menu.MenuFin(ptg.pointV);
-	else
+		else
 		menu.MenuFin(ptg.pointV, ptg.pointO);
+	}
 	/*if(true)//if bouton pressed
 	{	
 		cpt = game.startGame(diff);
