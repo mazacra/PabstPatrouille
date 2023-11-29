@@ -149,17 +149,24 @@ namespace Menu
     void MenuPabst::MenuFin(int pointV, int pointO = -1)
     {
         lcd.setCursor(0,0);
-        lcd.print("-----Bien joué!-----");
-        lcd.setCursor(6,1);
-        lcd.print(game.pointsVert);
-        lcd.print(" points pour Vert");
-        lcd.setCursor(7,1);
-        lcd.print(game.pointsOrange);
-        lcd.print(" points pour Orange");
-        lcd.setCursor(0,2);
+        lcd.print("-----Bien joue!-----");
+        lcd.setCursor(5,1);
+        if (pointO == -1)
+        {
+            lcd.print(game.pointsVert);
+            lcd.print(" points ");
+        }
+        else
+        {        
+            lcd.print("Vert : ");
+            lcd.print(game.pointsVert);
+            lcd.setCursor(3,2);
+            lcd.print("Orange : ");
+            lcd.print(game.pointsOrange);
+        }
+
+        lcd.setCursor(1,3);
         lcd.print("Derriere:  quitter");
-        lcd.setCursor(0,3);
-        lcd.print("--------------------");
 
         game.nettoyage();
 

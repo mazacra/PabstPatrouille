@@ -251,14 +251,13 @@ namespace Game
         ENCODER_Reset(1);
         tempsStart = millis();
 
-        while (millis() < (tempsStart + (60000)))
+        while (millis() < (tempsStart + (30000)))
         {
             switch(diff)
             {
                 case 1:
                     mode1();
                     break;
-                
                  case 2:
                     mode2();
                     break;
@@ -270,16 +269,17 @@ namespace Game
                     break;
             }
 
-            if(multiJ){
+            if(!multiJ){
                 if(module.detectionBallePanierTemp() != 0)
                     pointsVert++;
             }else{
-                if(module.detectionBallePanierTemp() == 1) //si détecte balle verte
+                int couleur = module.detectionBallePanierTemp();
+                if(couleur == 1) //si détecte balle verte
                 {
                     pointsVert++;
                 }
 
-                if(module.detectionBallePanierTemp() == 2) //si détecte balle orange
+                if(couleur == 2) //si détecte balle orange
                 {
                     pointsOrange++;
                 }
