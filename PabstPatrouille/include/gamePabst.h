@@ -6,6 +6,7 @@
 using namespace Moteur;
 using namespace Module;
 
+#define PINMOTEUR 42
 #define BOUTONROUGE 31
 
 namespace Game
@@ -62,22 +63,18 @@ namespace Game
         {
             case 1:
                 moteur.tDroite(90);
-                menu.MenuDebutJeu();
                 break;
             
             case 2:
-            menu.MenuDebutJeu();
                 break;
 
             case 3:
-            menu.MenuDebutJeu();
                 break;
 
             case 4:
                 moteur.tGauche(90);
                 moteur.vitesseConstante(30, 0.3, 0.3);
                 moteur.tDroite(90);
-                menu.MenuDebutJeu();
                 break;
             
             default:
@@ -94,7 +91,6 @@ namespace Game
 
     void GamePabst::mode1() //Aller-retour
     {
-        bool condition = true;
         float vitesse = 0.2;
         if(etape == 0)
         {
@@ -388,6 +384,8 @@ namespace Game
         bool dirTournant = 1;
 
         GamePabst::prepNettoyage();
+        digitalWrite(PINMOTEUR, HIGH);
+
         while (true)
         {
             if(digitalRead(BOUTONROUGE))
@@ -401,6 +399,7 @@ namespace Game
             if(digitalRead(BOUTONROUGE))
             {
                 moteur.arret();
+                digitalWrite(PINMOTEUR, LOW);
                 return;
             }
             if(ROBUS_ReadIR(2) > 100 && ROBUS_ReadIR(1) > 100){
@@ -410,6 +409,8 @@ namespace Game
             moteur.tourneDir(dirTournant);
             dirTournant = dirTournant == 0 ? 1 : 0;
         }
+
+        digitalWrite(PINMOTEUR, LOW);
     }
 
 
@@ -526,7 +527,6 @@ namespace Game
 
     void GamePabst::joueurGagnant(int pointsVert, int pointsOrange, int scoreGagnat, char couleurGagnate[])
     {
-        int scoreGagnant = 0;
         char couleurGagnante[10] = "";
 
         if (pointsVert > pointsOrange)

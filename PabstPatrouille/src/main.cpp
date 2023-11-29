@@ -3,6 +3,7 @@
 #include <Adafruit_TCS34725.h>
 #include "menuPabst.h"
 
+#define PINMOTEUR 42
 using namespace Menu;
 
 //Global var
@@ -17,6 +18,9 @@ void setup()
 	pinMode(32, INPUT);
 	pinMode(33, INPUT_PULLUP);
 	pinMode(34, INPUT);
+	pinMode(PINMOTEUR, OUTPUT);
+
+	digitalWrite(PINMOTEUR, LOW);
 
     lcd.init();
     lcd.backlight();

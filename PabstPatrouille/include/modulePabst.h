@@ -41,8 +41,6 @@ namespace Module
     }
 
     int ModulePabst::detectionTemps(){
-        int temp = 0;
- 
         tcs.getRawData(&r, &g, &b, &c);
         tcs.getRawData(&r, &g, &b, &c);
  

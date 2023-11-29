@@ -29,7 +29,7 @@ namespace Menu
             pointage MenuSelectMulti(int diff);
             void MenuDebutJeu();
             void AffichagePointInGame(int pointsVert, int pointsOrange);
-            void MenuFin(int pointV, int pointO = -1);
+            void MenuFin(int pointV, int pointO);
             void MenuTopFive(int top[]);
 
             static int top[5];
