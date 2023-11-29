@@ -9,6 +9,10 @@ using namespace Game;
 #define BUMPDROITE 1
 #define BUMPGAUCHE 0
 
+#define BOUTONROUGE 31
+#define BOUTONBLEU 32
+#define BOUTONJAUNE 33
+#define BOUTONVERT 34
 GamePabst game;
 
 namespace Menu
@@ -31,6 +35,9 @@ namespace Menu
         private:
 
     };
+    //bumper brancher dans un numerique
+    //digitalRead(leNumeroDeLaPine) pour avoir 
+
 
     // Initialisation des scores au démarrage du programme
     void MenuPabst::initializeTopScores()//initialiser avec setup()
@@ -46,20 +53,23 @@ namespace Menu
         lcd.setCursor(0,0);
         lcd.print("--------Menu--------");
         lcd.setCursor(0,1);
-        lcd.print("    Devant: score   ");
+        lcd.print("    Jaune: score   ");
         lcd.setCursor(0,2);
-        lcd.print("Derriere:  commencer");
+        lcd.print("Vert:  commencer"); ///////////////////------
         lcd.setCursor(0,3);
         lcd.print("--------------------");
 
         while (true)
         {
-            if(ROBUS_IsBumper(BUMPAVANT))
+            if(digitalRead(BOUTONJAUNE))//////////////////////
             {
                 //MenuPabst::MenuTopFive();
             }
-            if(ROBUS_IsBumper(BUMPARRIERE))
+            Serial.println(digitalRead(BOUTONVERT));
+
+            if(digitalRead(BOUTONVERT))///////////////////--------
             {
+                while(digitalRead(BOUTONVERT));
                 return MenuPabst::MenuSelectDiff();
             }
         } 
@@ -74,36 +84,39 @@ namespace Menu
         lcd.setCursor(0,1);
         lcd.print("<--      0       -->");
         lcd.setCursor(0,2);
-        lcd.print("Derriere:  commencer");
+        lcd.print("Vert:  commencer"); //////////////////----
         lcd.setCursor(0,3);
         lcd.print("--------------------");
         
         delay(500);
         while (true)
         {
-            if(ROBUS_IsBumper(BUMPARRIERE)){
+            if(digitalRead(BOUTONVERT)){/////////////////----
+                while(digitalRead(BOUTONVERT));
                 lcd.clear();
                 return MenuPabst::MenuSelectMulti(diff);
                 //return cpt;
             }
 
-            if(ROBUS_IsBumper(BUMPDROITE)){
+            if(digitalRead(BOUTONBLEU)){///////////////////////
                 if(diff < 4)
                 {
                     diff++;
                     lcd.setCursor(9,1);
                     lcd.print(diff);
-                    while (ROBUS_IsBumper(BUMPDROITE)){}
+                    while (digitalRead(BOUTONBLEU)){}//////////////
                     
                 }
             }
-            if(ROBUS_IsBumper(BUMPGAUCHE)){
+            if(digitalRead(BOUTONJAUNE)){
                 if(diff > 0)
                 {
+                    Serial.println("1");
                     diff--;
-                    lcd.setCursor(9,1);
+                    lcd.setCursor(9,1);   
                     lcd.print(diff);
-                    while (ROBUS_IsBumper(BUMPGAUCHE)){}
+                    while (digitalRead(BOUTONJAUNE)){}/////////////////
+
                 }
             }
         }
@@ -118,30 +131,30 @@ namespace Menu
         lcd.setCursor(0,1);
         lcd.print("<--     SOLO     -->");
         lcd.setCursor(0,2);
-        lcd.print("Derriere:  commencer");
+        lcd.print("Vert:  commencer");
         lcd.setCursor(0,3);
         lcd.print("--------------------");
         
         delay(500);
         while (true)
         {
-            if(ROBUS_IsBumper(BUMPARRIERE)){
+            if(digitalRead(BOUTONVERT)){/////////////////////
                 lcd.clear();
                 return game.startGame(diff, mutlijoueur);
                 //return cpt;
             }
 
-            if(ROBUS_IsBumper(BUMPDROITE)){
+            if(digitalRead(BOUTONBLEU)){////////////////////// MULTIJOUEUR
                 mutlijoueur = true;
                 lcd.setCursor(7,1);
                 lcd.print("MULTI");
-                while (ROBUS_IsBumper(BUMPDROITE)){}
+                while (digitalRead(BOUTONBLEU)){}//////////////
             }
-            if(ROBUS_IsBumper(BUMPGAUCHE)){
+            if(digitalRead(BOUTONJAUNE)){
                 mutlijoueur = false;
-                lcd.setCursor(8,1);
-                lcd.print("SOLO");
-                while (ROBUS_IsBumper(BUMPGAUCHE)){}
+                lcd.setCursor(7,1);
+                lcd.print(" SOLO");
+                while (digitalRead(BOUTONJAUNE)){}////////////
             }
         }
     }
@@ -172,7 +185,7 @@ namespace Menu
 
         while (true)
         {
-            if(ROBUS_IsBumper(BUMPARRIERE))
+            if(digitalRead(BOUTONROUGE))/////////////
                 return;
         }
         

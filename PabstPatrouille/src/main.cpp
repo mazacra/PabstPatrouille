@@ -13,6 +13,10 @@ int cpt;
 void setup() 
 {
 	BoardInit(); //Init libraire LibRobus
+	pinMode(31, INPUT);
+	pinMode(32, INPUT);
+	pinMode(33, INPUT_PULLUP);
+	pinMode(34, INPUT);
 
     lcd.init();
     lcd.backlight();
