@@ -9,10 +9,10 @@ using namespace Game;
 #define BUMPDROITE 1
 #define BUMPGAUCHE 0*/
 
-#define BOUTONROUGE 31
-#define BOUTONBLEU 32
-#define BOUTONJAUNE 33
-#define BOUTONVERT 34
+#define BOUTONBLEU 31
+#define BOUTONROUGE 32
+#define BOUTONVERT 33
+#define BOUTONJAUNE 34
 GamePabst game;
 
 namespace Menu
