@@ -4,10 +4,10 @@
 
 using namespace Game;
 
-#define BUMPARRIERE 3
+/*#define BUMPARRIERE 3
 #define BUMPAVANT 2
 #define BUMPDROITE 1
-#define BUMPGAUCHE 0
+#define BUMPGAUCHE 0*/
 
 #define BOUTONROUGE 31
 #define BOUTONBLEU 32
@@ -214,7 +214,7 @@ namespace Menu
         }
 
         lcd.setCursor(1,3);
-        lcd.print("Derriere:  quitter");
+        lcd.print("rouge:  quitter");
 
         game.nettoyage();
 

@@ -6,6 +6,8 @@
 using namespace Moteur;
 using namespace Module;
 
+#define BOUTONROUGE 31
+
 namespace Game
 {
     MoteurPabst moteur;
@@ -71,7 +73,7 @@ namespace Game
             menu.MenuDebutJeu();
                 break;
 
-             case 4:
+            case 4:
                 moteur.tGauche(90);
                 moteur.vitesseConstante(30, 0.3, 0.3);
                 moteur.tDroite(90);
@@ -257,6 +259,14 @@ namespace Game
 
         while (millis() < (tempsStart + (30000)))
         {
+            if(digitalRead(BOUTONROUGE))
+            {
+                moteur.arret();
+                pointage stop;
+                stop.pointV = -1;
+                return stop;
+            }
+            Serial.println(((tempsStart + 60000) - millis())/100);
             switch(diff)
             {
                 case 1:
@@ -307,11 +317,23 @@ namespace Game
     void GamePabst::prepNettoyage(){
         while (ROBUS_ReadIR(2) < 400)
         {
+            if(digitalRead(BOUTONROUGE))
+            {
+                moteur.arret();
+                return;
+            }
+
             MOTOR_SetSpeed(LEFT, 0.16);
             MOTOR_SetSpeed(RIGHT, 0.16);
         }
         while (ROBUS_ReadIR(3) < 450)
         {
+            if(digitalRead(BOUTONROUGE))
+            {
+                moteur.arret();
+                return;
+            }
+
             MOTOR_SetSpeed(LEFT, -0.16);
             MOTOR_SetSpeed(RIGHT, 0.16);
         }
@@ -324,6 +346,12 @@ namespace Game
 
         while (ROBUS_ReadIR(2) < 400)
         {
+            if(digitalRead(BOUTONROUGE))
+            {
+                moteur.arret();
+                return;
+            }
+            
             MOTOR_SetSpeed(LEFT, vg);
             MOTOR_SetSpeed(RIGHT, 0.16);
 
@@ -341,16 +369,6 @@ namespace Game
                 MOTOR_SetSpeed(LEFT, 0.40);
                 MOTOR_SetSpeed(RIGHT, 0.20);
             }
-            //if(ROBUS_ReadIR(1) < ROBUS_ReadIR(3)){
-            //    Serial.println("Gauche");
-            //    if(vg < 0.20)
-            //        vg += 0.01;
-            //}
-            //if(ROBUS_ReadIR(1) > ROBUS_ReadIR(3)){
-            //    Serial.println("Droite");
-            //    if(vg > 0.1)
-            //        vg -= 0.01;
-            //}
         }
         while (ROBUS_ReadIR(1) + 50 > ROBUS_ReadIR(3) && ROBUS_ReadIR(1) - 50 < ROBUS_ReadIR(3))
         {
@@ -372,8 +390,19 @@ namespace Game
         GamePabst::prepNettoyage();
         while (true)
         {
+            if(digitalRead(BOUTONROUGE))
+            {
+                moteur.arret();
+                return;
+            }
+
             moteur.avanceDistance(1.7);
             moteur.tourneDir(dirTournant);
+            if(digitalRead(BOUTONROUGE))
+            {
+                moteur.arret();
+                return;
+            }
             if(ROBUS_ReadIR(2) > 100 && ROBUS_ReadIR(1) > 100){
                 break;
             }
