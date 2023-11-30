@@ -77,7 +77,6 @@ namespace Moteur
         {					
                 MOTOR_SetSpeed(LEFT, vitesseRoueGauche);			//Changement de vitesse
                 MOTOR_SetSpeed(RIGHT, 0);							//Changement de vitesse
-
         }
         arret();
     }

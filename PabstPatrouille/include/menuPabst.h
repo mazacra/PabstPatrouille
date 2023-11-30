@@ -9,10 +9,10 @@ using namespace Game;
 #define BUMPDROITE 1
 #define BUMPGAUCHE 0*/
 
-#define BOUTONBLEU 31
-#define BOUTONROUGE 32
-#define BOUTONVERT 33
-#define BOUTONJAUNE 34
+#define BOUTONBLEU 37
+#define BOUTONROUGE 41
+#define BOUTONVERT 38
+#define BOUTONJAUNE 39
 GamePabst game;
 
 namespace Menu
@@ -57,21 +57,20 @@ namespace Menu
         lcd.setCursor(0,1);
         lcd.print("    Jaune: score   ");
         lcd.setCursor(0,2);
-        lcd.print("Vert:  commencer"); ///////////////////------
+        lcd.print("Vert:  commencer"); 
         lcd.setCursor(0,3);
         lcd.print("--------------------");
 
         while (true)
         {
-            if(digitalRead(BOUTONJAUNE))//////////////////////
+            if(digitalRead(BOUTONJAUNE))
             {
                 //MenuPabst::MenuTopFive();
             }
-            Serial.println(digitalRead(BOUTONVERT));
 
-            if(digitalRead(BOUTONVERT))///////////////////--------
+            if(digitalRead(BOUTONVERT))
             {
-                while(digitalRead(BOUTONVERT));
+                while(digitalRead(BOUTONVERT)){}
                 return MenuPabst::MenuSelectDiff();
             }
         } 
@@ -86,39 +85,38 @@ namespace Menu
         lcd.setCursor(0,1);
         lcd.print("<--      0       -->");
         lcd.setCursor(0,2);
-        lcd.print("Vert:  commencer"); //////////////////----
+        lcd.print("Vert:  commencer");
         lcd.setCursor(0,3);
         lcd.print("--------------------");
         
         delay(500);
         while (true)
         {
-            if(digitalRead(BOUTONVERT)){/////////////////----
-                while(digitalRead(BOUTONVERT));
+            if(digitalRead(BOUTONVERT)){
+                while(digitalRead(BOUTONVERT)){}
                 lcd.clear();
+                Serial.println(diff);
                 return MenuPabst::MenuSelectMulti(diff);
-                //return cpt;
             }
 
-            if(digitalRead(BOUTONBLEU)){///////////////////////
+            if(digitalRead(BOUTONBLEU)){
                 if(diff < 4)
                 {
                     diff++;
                     lcd.setCursor(9,1);
                     lcd.print(diff);
-                    while (digitalRead(BOUTONBLEU)){}//////////////
-                    
+                    while (digitalRead(BOUTONBLEU)){}
+                    delay(100);
                 }
             }
             if(digitalRead(BOUTONJAUNE)){
                 if(diff > 0)
                 {
-                    Serial.println("1");
                     diff--;
                     lcd.setCursor(9,1);   
                     lcd.print(diff);
-                    while (digitalRead(BOUTONJAUNE)){}/////////////////
-
+                    while (digitalRead(BOUTONJAUNE)){}
+                    delay(100);
                 }
             }
         }
@@ -140,23 +138,24 @@ namespace Menu
         delay(500);
         while (true)
         {
-            if(digitalRead(BOUTONVERT)){/////////////////////
+            if(digitalRead(BOUTONVERT)){
                 lcd.clear();
+                Serial.println(mutlijoueur);
                 return game.startGame(diff, mutlijoueur);
                 //return cpt;
             }
 
-            if(digitalRead(BOUTONBLEU)){////////////////////// MULTIJOUEUR
+            if(digitalRead(BOUTONBLEU)){
                 mutlijoueur = true;
                 lcd.setCursor(7,1);
                 lcd.print("MULTI");
-                while (digitalRead(BOUTONBLEU)){}//////////////
+                while (digitalRead(BOUTONBLEU)){}
             }
             if(digitalRead(BOUTONJAUNE)){
                 mutlijoueur = false;
                 lcd.setCursor(7,1);
                 lcd.print(" SOLO");
-                while (digitalRead(BOUTONJAUNE)){}////////////
+                while (digitalRead(BOUTONJAUNE)){}
             }
         }
     }
@@ -220,7 +219,7 @@ namespace Menu
 
         while (true)
         {
-            if(digitalRead(BOUTONROUGE))/////////////
+            if(digitalRead(BOUTONROUGE))
                 return;
         }
         

@@ -14,10 +14,11 @@ int cpt;
 void setup() 
 {
 	BoardInit(); //Init libraire LibRobus
-	pinMode(31, INPUT);
-	pinMode(32, INPUT);
-	pinMode(33, INPUT_PULLUP);
-	pinMode(34, INPUT);
+
+	pinMode(37, INPUT);
+	pinMode(38, INPUT);
+	pinMode(39, INPUT);
+	pinMode(41, INPUT);
 	pinMode(PINMOTEUR, OUTPUT);
 
 	digitalWrite(PINMOTEUR, LOW);
@@ -33,6 +34,13 @@ void setup()
 void loop() 
 {
 	//LCD AFFICHAGE MENU
+	//MOTOR_SetSpeed(0, 0.2);
+	//MOTOR_SetSpeed(1, 0.2);
+//
+	//Serial.print(ENCODER_Read(LEFT));
+	//Serial.print("\t");
+	//Serial.println(ENCODER_Read(RIGHT));
+
 	pointage ptg = menu.MenuStart();
 	if(ptg.pointV != -1)
 	{

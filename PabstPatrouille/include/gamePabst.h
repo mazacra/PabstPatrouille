@@ -7,7 +7,7 @@ using namespace Moteur;
 using namespace Module;
 
 #define PINMOTEUR 42
-#define BOUTONROUGE 31
+#define BOUTONROUGE 41
 
 namespace Game
 {
@@ -57,8 +57,8 @@ namespace Game
         //Déplacer le robot dans la "zone" jeu
         multiJ = multi;
         moteur.tDroite(180);
-        moteur.vitesseConstante(150, 0.5, 0.5); //Changer la distance où on veux dans le 2x2 mètre
-        Serial.println("123");
+        moteur.avanceDistance(1); //Changer la distance où on veux dans le 2x2 mètre
+        digitalWrite(PINMOTEUR, HIGH);
         
         switch (diff)
         {
@@ -263,7 +263,7 @@ namespace Game
                 stop.pointV = -1;
                 return stop;
             }
-            Serial.println(((tempsStart + 60000) - millis())/100);
+
             switch(diff)
             {
                 case 1:
@@ -384,8 +384,8 @@ namespace Game
     void GamePabst::nettoyage(){
         bool dirTournant = 1;
 
-        GamePabst::prepNettoyage();
         digitalWrite(PINMOTEUR, HIGH);
+        GamePabst::prepNettoyage();
 
         while (true)
         {
