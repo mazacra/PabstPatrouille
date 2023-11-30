@@ -177,7 +177,7 @@ namespace Menu
             lcd.print(game.pointsOrange);
         }
 
-        lcd.setCursor(1,3);
+        lcd.setCursor(2,3);
         lcd.print("Rouge :  Quitter");
 
         game.nettoyage();
