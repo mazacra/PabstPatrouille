@@ -42,6 +42,8 @@ namespace Game
             void mode3();
             void mode4();
             void joueurGagnant(int pointsVert, int pointsOrange, int scoreGagnat, char couleurGagnante[]);
+            void MenuDebutJeu();
+            void AffichagePointInGame(int pointsVert, int pointsOrange);
 
             int pointsVert;
             int pointsOrange;
@@ -255,6 +257,7 @@ namespace Game
         ENCODER_Reset(1);
         tempsStart = millis();
 
+        MenuDebutJeu();
         while (millis() < (tempsStart + (30000)))
         {
             if(digitalRead(BOUTONROUGE))
@@ -283,17 +286,23 @@ namespace Game
 
             if(!multiJ){
                 if(module.detectionBallePanierTemp() != 0)
+                {
                     pointsVert++;
+                    AffichagePointInGame(pointsVert, pointsOrange);
+                }
+                    
             }else{
                 int couleur = module.detectionBallePanierTemp();
                 if(couleur == 1) //si détecte balle verte
                 {
                     pointsVert++;
+                    AffichagePointInGame(pointsVert, pointsOrange);
                 }
 
                 if(couleur == 2) //si détecte balle orange
                 {
                     pointsOrange++;
+                    AffichagePointInGame(pointsVert, pointsOrange);
                 }
             }
         }
@@ -547,6 +556,39 @@ namespace Game
         {
             scoreGagnant = pointsVert;
             strcpy(couleurGagnante, "Egalite");
+        }
+    }
+
+    void GamePabst::MenuDebutJeu()
+    {
+        lcdGame.clear();
+        lcdGame.setCursor(0,2);
+        lcdGame.print("---------GO---------");
+        Serial.println("GOOOOOOOOOOOOO");
+    }
+
+    void GamePabst::AffichagePointInGame(int pointsVert, int pointsOrange)
+    {
+        if (multiJ)
+        {       
+            lcdGame.clear();
+            lcdGame.setCursor(3,0);
+            lcdGame.print("VERT");
+            lcdGame.setCursor(5,2);
+            lcdGame.print(pointsVert);
+            lcdGame.setCursor(12,0);
+            lcdGame.print("ORANGE");
+            lcdGame.setCursor(15,2);
+            lcdGame.print(pointsOrange);
+        }
+
+        if (!multiJ)
+        {
+            lcdGame.clear();
+            lcdGame.setCursor(7,0);
+            lcdGame.print("POINTS");
+            lcdGame.setCursor(10,2);
+            lcdGame.print(pointsVert);
         }
     }
 }

@@ -27,8 +27,6 @@ namespace Menu
             pointage MenuStart();
             pointage MenuSelectDiff();
             pointage MenuSelectMulti(int diff);
-            void MenuDebutJeu();
-            void AffichagePointInGame(int pointsVert, int pointsOrange);
             void MenuFin(int pointV, int pointO);
             void MenuTopFive(int top[]);
 
@@ -57,7 +55,7 @@ namespace Menu
         lcd.setCursor(0,1);
         lcd.print("    Jaune: score   ");
         lcd.setCursor(0,2);
-        lcd.print("Vert:  commencer"); 
+        lcd.print("  Vert:  commencer"); 
         lcd.setCursor(0,3);
         lcd.print("--------------------");
 
@@ -160,60 +158,27 @@ namespace Menu
         }
     }
 
-    void MenuDebutJeu()
-    {
-        lcd.clear();
-        lcd.setCursor(0,2);
-        lcd.print("---------GO---------");
-
-    }
-
-    void AffichagePointInGame(int pointsVert, int pointsOrange)
-    {
-        if (multiJ)
-        {       
-            lcd.clear();
-            lcd.setCursor(0,0);
-            lcd.print("V");
-            lcd.setCursor(0,1);
-            lcd.print(pointsVert);
-            lcd.setCursor(10,0);
-            lcd.print("O");
-            lcd.setCursor(10,1);
-            lcd.print(pointsOrange);
-        }
-
-        if (!multiJ)
-        {
-            lcd.clear();
-            lcd.setCursor(7,0);
-            lcd.print("POINTS");
-            lcd.setCursor(7,1);
-            lcd.print(pointsVert);
-        }
-    }
-
     void MenuPabst::MenuFin(int pointV, int pointO = -1)
     {
         lcd.setCursor(0,0);
         lcd.print("-----Bien joue!-----");
-        lcd.setCursor(5,1);
+        lcd.setCursor(0,1);
         if (pointO == -1)
         {
+            lcd.print(" POINTS :  ");
             lcd.print(game.pointsVert);
-            lcd.print(" points ");
         }
         else
         {        
-            lcd.print("Vert : ");
+            lcd.print("VERT : ");
             lcd.print(game.pointsVert);
-            lcd.setCursor(3,2);
-            lcd.print("Orange : ");
+            lcd.setCursor(0,2);
+            lcd.print("ORANGE : ");
             lcd.print(game.pointsOrange);
         }
 
         lcd.setCursor(1,3);
-        lcd.print("rouge:  quitter");
+        lcd.print("Rouge :  Quitter");
 
         game.nettoyage();
 
