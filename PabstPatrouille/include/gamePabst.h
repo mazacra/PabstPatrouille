@@ -248,6 +248,7 @@ namespace Game
 
     pointage GamePabst::currentGame(int &pointsVert, int &pointsOrange, int diff)
     {
+        etape = 0;
         pointsVert = 0;
         pointsOrange = 0;
         ENCODER_Reset(0);
