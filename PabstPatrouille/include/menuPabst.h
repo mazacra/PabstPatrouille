@@ -52,8 +52,8 @@ namespace Menu
     {
         lcd.setCursor(0,0);
         lcd.print("--------Menu--------");
-        lcd.setCursor(0,1);
-        lcd.print("    Jaune: score   ");
+        /*lcd.setCursor(0,1);
+        lcd.print("    Jaune: score   ");*/
         lcd.setCursor(0,2);
         lcd.print("  Vert:  commencer"); 
         lcd.setCursor(0,3);
@@ -90,14 +90,23 @@ namespace Menu
         delay(500);
         while (true)
         {
-            if(digitalRead(BOUTONVERT)){
+            if(digitalRead(BOUTONVERT))
+            {
                 while(digitalRead(BOUTONVERT)){}
                 lcd.clear();
                 Serial.println(diff);
                 return MenuPabst::MenuSelectMulti(diff);
             }
+            
+            if(digitalRead(BOUTONROUGE))
+            {
+                while(digitalRead(BOUTONROUGE)){}
+                lcd.clear();
+                return MenuPabst::MenuStart();
+            }
 
-            if(digitalRead(BOUTONBLEU)){
+            if(digitalRead(BOUTONBLEU))
+            {
                 if(diff < 4)
                 {
                     diff++;
@@ -142,6 +151,13 @@ namespace Menu
                 return game.startGame(diff, mutlijoueur);
                 //return cpt;
             }
+            if(digitalRead(BOUTONROUGE))
+            {
+                while(digitalRead(BOUTONROUGE)){}
+                lcd.clear();
+                return MenuPabst::MenuSelectDiff();
+            }
+
 
             if(digitalRead(BOUTONBLEU)){
                 mutlijoueur = true;
@@ -163,7 +179,7 @@ namespace Menu
         lcd.setCursor(0,0);
         lcd.print("-----Bien joue!-----");
         lcd.setCursor(0,1);
-        if (pointO == -1)
+        if (pointO != -1)
         {
             lcd.print(" POINTS :  ");
             lcd.print(game.pointsVert);

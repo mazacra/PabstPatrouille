@@ -222,7 +222,7 @@ namespace Game
         Serial.println(cptrMode3);
         Serial.println("etape");
         Serial.println(etape);
-        if(((cptrMode3 - 2) % 5) == 0 || etape == 3)
+        if(((cptrMode3 - 2) % 3) == 0 || etape == 3)
         {
             etape = 3;
             if(((roueInterieurDistance / CIRCONFERENCE_ROUE) * 3200) + 1200 > ENCODER_Read(RIGHT))
@@ -260,6 +260,7 @@ namespace Game
         MenuDebutJeu();
         while (millis() < (tempsStart + (30000)))
         {
+
             if(digitalRead(BOUTONROUGE))
             {
                 moteur.arret();
